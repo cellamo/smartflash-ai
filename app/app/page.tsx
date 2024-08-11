@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Brain, Lightbulb, Flame, Sparkles ,ArrowUpRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { NavBarDock } from "@/components/dock";
+import { NavBarDock } from "@/components/NavBarDock";
 import { DashboardCard } from "@/components/DashboardCard";
 import { RecentX } from "@/components/RecentX";
 
