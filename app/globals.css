@@ -40,7 +40,7 @@ html {
   }
 
   .dark {
-    --background: 222.2 47.4% 11.2%;
+    --background: 217.2 32.6% 17.5%;
     --foreground: 210 20% 98%;
 
     --card: 222.2 47.4% 11.2%;
@@ -85,5 +85,15 @@ html {
   }
   body {
     @apply bg-background text-foreground;
+  }
+}
+
+@media (max-width: 768px) {
+  body {
+    padding-bottom: 4rem; /* Adjust this value based on the height of your dock */
+  }
+
+  .mobile-dock {
+    height: 4rem; /* Set this to match the padding-bottom on the body */
   }
 }

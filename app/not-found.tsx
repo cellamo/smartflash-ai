@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { Brain, Lightbulb, RotateCcw, Home } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface Flashcard {
   question: string;
@@ -58,8 +59,7 @@ const flashcards = [
 const NotFound: React.FC = () => {
   const [flashcard, setFlashcard] = useState<Flashcard>({ question: '', answer: '' });
   const [showAnswer, setShowAnswer] = useState(false);
-
-  
+  const router = useRouter();
 
   useEffect(() => {
     const randomIndex = Math.floor(Math.random() * flashcards.length);
@@ -108,9 +108,12 @@ const NotFound: React.FC = () => {
           </div>
         </div>
         
-        <Link href="/" className="bg-slate-700 text-white hover:bg-slate-600 font-semibold py-2 px-4 rounded-full transition duration-300 flex items-center">
-          <Home className="mr-2 w-5 h-5" /> Return to Homepage
-        </Link>
+        <button 
+        onClick={() => router.back()} 
+        className="bg-slate-700 text-white hover:bg-slate-600 font-semibold py-2 px-4 rounded-full transition duration-300 flex items-center"
+      >
+        <RotateCcw className="mr-2 w-5 h-5" /> Go Back
+      </button>
       </main>
     </>
   );
