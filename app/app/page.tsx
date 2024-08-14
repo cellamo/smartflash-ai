@@ -7,13 +7,33 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { NavBarDock } from "@/components/NavBarDock";
 import { DashboardCard } from "@/components/DashboardCard";
 import { RecentX } from "@/components/RecentX";
+import { useEffect, useState } from "react";
+import { MobileDock } from "@/components/MobileDock";
 
 export default function App() {
+
+  const [isMobile, setIsMobile] = useState(false)
+
+  useEffect(() => {
+    const checkIfMobile = () => {
+      setIsMobile(window.innerWidth <= 768); // Adjust the breakpoint as needed
+    }
+
+    checkIfMobile()
+    window.addEventListener('resize', checkIfMobile)
+
+    return () => {
+      window.removeEventListener('resize', checkIfMobile)
+    }
+  }, [])
+
+
   return (
     <div className="flex min-h-screen w-full flex-col">
-      <NavBarDock />
-      <main className="flex flex-1 flex-col gap-4 p-4 bg-slate-800 md:gap-8 md:p-8 md:pt-4">
-      <div className="grid grid-cols-2 gap-4">
+      {!isMobile && <NavBarDock />}
+      {isMobile && <MobileDock />}
+      <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4">
+      <div className="grid grid-cols-2 gap-2 max-w-4xl mx-auto">
       <DashboardCard
     title="Flashcards Reviewed"
     value="1,234"
@@ -39,8 +59,6 @@ export default function App() {
     icon={Sparkles}
   />
 </div>
-
-
 
         <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
           <Card className="xl:col-span-2">

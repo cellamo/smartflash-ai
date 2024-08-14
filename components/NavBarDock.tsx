@@ -37,11 +37,11 @@ export function NavBarDock() {
   const pathname = usePathname();
 
   return (
-    <header className="fixed md:sticky top-0 left-0 right-0 md:left-auto md:right-auto z-50 md:z-auto flex h-16 bg-slate-800 items-center gap-4 border-b-0 md:border-b bg-background/0 md:bg-background px-4 md:px-6">
+    <header className="sticky top-0 z-auto hidden lg:flex h-16 items-center gap-4 border-b bg-background px-6">
       <TooltipProvider>
         <Dock
           direction="middle"
-          className="fixed bg-slate-200/50 dark:bg-slate-600/50 bottom-0 left-0 right-0 w-full md:static md:ml-auto z-50 mobile-dock"
+          className="bg-slate-200/50 dark:bg-slate-600/50 ml-auto"
           >
           {NAV_ITEMS.map((item) => (
             <DockIcon key={item.label}>
