@@ -93,7 +93,7 @@ function StudyDecks() {
   );
 }
 
-export default function StudyPage() {
+function StudyContent() {
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -103,13 +103,21 @@ export default function StudyPage() {
   }, [searchParams]);
 
   return (
-    <div className="container mx-auto pb-14 px-4 py-10 max-w-4xl bg-slate-200">
+    <>
       <h1 className="text-3xl font-bold text-center mb-8">Your Study Decks</h1>
+      <StudyDecks />
+    </>
+  );
+}
+
+export default function StudyPage() {
+  return (
+    <div className="container mx-auto pb-14 px-4 py-10 max-w-4xl bg-slate-200">
       <MobileDock />
       <Suspense fallback={<div>Loading...</div>}>
-        <StudyDecks />
-        <Toaster />
+        <StudyContent />
       </Suspense>
+      <Toaster />
     </div>
   );
 }
