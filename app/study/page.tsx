@@ -27,10 +27,9 @@ const mockDecks: Deck[] = [
   { id: 3, name: "Spanish Vocabulary", cardCount: 200, lastStudied: "3 days ago" },
 ];
 
-export default function StudyPage() {
+function StudyDecks() {
   const [decks, setDecks] = useState<Deck[]>(mockDecks);
   const [newDeckName, setNewDeckName] = useState("");
-  const searchParams = useSearchParams();
 
   const createNewDeck = () => {
     if (newDeckName.trim()) {
@@ -45,17 +44,8 @@ export default function StudyPage() {
     }
   };
 
-  useEffect(() => {
-    if (searchParams.get('sessionEnded') === 'true') {
-      toast.success("Keep up the good work! You've completed your session.");
-    }
-  }, [searchParams]);
-
   return (
-    <div className="container mx-auto pb-14 px-4 py-10 max-w-4xl bg-slate-200">
-      <h1 className="text-3xl font-bold text-center mb-8">Your Study Decks</h1>
-      <MobileDock />
-
+    <>
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {decks.map((deck) => (
           <Card key={deck.id} className="flex flex-col">
@@ -99,8 +89,26 @@ export default function StudyPage() {
           <Plus className="mr-2 h-4 w-4" /> Create New Deck
         </Button>
       </div>
+    </>
+  );
+}
+
+export default function StudyPage() {
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    if (searchParams.get('sessionEnded') === 'true') {
+      toast.success("Keep up the good work! You've completed your session.");
+    }
+  }, [searchParams]);
+
+  return (
+    <div className="container mx-auto pb-14 px-4 py-10 max-w-4xl bg-slate-200">
+      <h1 className="text-3xl font-bold text-center mb-8">Your Study Decks</h1>
+      <MobileDock />
       <Suspense fallback={<div>Loading...</div>}>
-      <Toaster />
+        <StudyDecks />
+        <Toaster />
       </Suspense>
     </div>
   );

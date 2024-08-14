@@ -154,35 +154,38 @@ useEffect(() => {
           <X className="h-6 w-6" />
         </Button>
       </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>End this study session?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Your progress will be saved, but you&apos;ll exit the current session.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction onClick={() => {
-  // Save the session data
-  const sessionData = {
-    deckId: deckName,
-    duration: time,
-    cardsStudied: currentCardIndex + 1,
-    // Add any other relevant data
-  };
+      <AlertDialogContent className="p-6">
+  <AlertDialogHeader>
+    <AlertDialogTitle>End this study session?</AlertDialogTitle>
+    <AlertDialogDescription>
+      Your progress will be saved, but you&apos;ll exit the current session.
+    </AlertDialogDescription>
+  </AlertDialogHeader>
+  <AlertDialogFooter className="flex justify-between">
+    <AlertDialogCancel>Cancel</AlertDialogCancel>
+    <AlertDialogAction
+      onClick={() => {
+        // Save the session data
+        const sessionData = {
+          deckId: deckName,
+          duration: time,
+          cardsStudied: currentCardIndex + 1,
+          // Add any other relevant data
+        };
 
-  // Here you would typically send this data to your backend
-  // For now, we'll just log it
-  console.log('Saving session data:', sessionData);
+        // Here you would typically send this data to your backend
+        // For now, we'll just log it
+        console.log('Saving session data:', sessionData);
 
-  // Navigate back to the study page
-  router.push('/study?sessionEnded=true');
-}}>
-  End Session
-</AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
+        // Navigate back to the study page
+        router.push('/study?sessionEnded=true');
+      }}
+    >
+      End Session
+    </AlertDialogAction>
+  </AlertDialogFooter>
+</AlertDialogContent>
+
     </AlertDialog>
   </div>
 </div>
