@@ -1,33 +1,39 @@
-// components/RecentSales.tsx
+// components/RecentX.tsx
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Brain, Clock, Sparkles } from "lucide-react";
 
-const RECENT_SALES = [
-  { name: "Olivia Martin", email: "olivia.martin@email.com", amount: "+$1,999.00" },
-  { name: "Jackson Lee", email: "jackson.lee@email.com", amount: "+$39.00" },
-  { name: "Isabella Nguyen", email: "isabella.nguyen@email.com", amount: "+$299.00" },
-  { name: "William Kim", email: "will@email.com", amount: "+$99.00" },
-  { name: "Sofia Davis", email: "sofia.davis@email.com", amount: "+$39.00" },
+const RECENT_DECKS = [
+  { name: "JavaScript Basics", lastStudied: "2 hours ago", cardCount: 50, isAIGenerated: true },
+  { name: "React Hooks", lastStudied: "Yesterday", cardCount: 30, isAIGenerated: false },
+  { name: "Data Structures", lastStudied: "3 days ago", cardCount: 75, isAIGenerated: true },
+  { name: "Spanish Vocabulary", lastStudied: "1 week ago", cardCount: 100, isAIGenerated: false },
+  { name: "Machine Learning Concepts", lastStudied: "2 weeks ago", cardCount: 60, isAIGenerated: true },
 ];
 
 export function RecentX() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Recent Sales</CardTitle>
+        <CardTitle>Recent Decks</CardTitle>
       </CardHeader>
-      <CardContent className="grid gap-8">
-        {RECENT_SALES.map((sale, index) => (
+      <CardContent className="grid gap-4">
+        {RECENT_DECKS.map((deck, index) => (
           <div key={index} className="flex items-center gap-4">
-            <Avatar className="hidden h-9 w-9 sm:flex">
-              <AvatarImage src={`/avatars/0${index + 1}.png`} alt="Avatar" />
-              <AvatarFallback>{sale.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+            <Avatar className="h-9 w-9">
+              <AvatarImage src={`/deck-icons/${index + 1}.png`} alt="Deck Icon" />
+              <AvatarFallback>{deck.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
             </Avatar>
-            <div className="grid gap-1">
-              <p className="text-sm font-medium leading-none">{sale.name}</p>
-              <p className="text-sm text-muted-foreground">{sale.email}</p>
+            <div className="grid gap-1 flex-1">
+              <p className="text-sm font-medium leading-none">{deck.name}</p>
+              <p className="text-xs text-muted-foreground flex items-center">
+                <Clock className="mr-1 h-3 w-3" /> {deck.lastStudied}
+              </p>
             </div>
-            <div className="ml-auto font-medium">{sale.amount}</div>
+            <div className="text-sm font-medium">{deck.cardCount} cards</div>
+            {deck.isAIGenerated && (
+              <Sparkles className="h-4 w-4 text-primary" aria-label="AI-Generated" />
+            )}
           </div>
         ))}
       </CardContent>
