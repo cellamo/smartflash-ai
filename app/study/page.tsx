@@ -1,7 +1,7 @@
 // app/study/page.tsx
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -99,7 +99,9 @@ export default function StudyPage() {
           <Plus className="mr-2 h-4 w-4" /> Create New Deck
         </Button>
       </div>
+      <Suspense fallback={<div>Loading...</div>}>
       <Toaster />
+      </Suspense>
     </div>
   );
 }
