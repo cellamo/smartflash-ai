@@ -10,6 +10,7 @@ import {
   AlertCircle,
   TrendingUp,
   Zap,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,12 +45,39 @@ export default function App() {
 
   const userName = "John Doe"; // Mock username data
 
+  if (!isMobile) {
+    return (
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-200 dark:bg-slate-800 p-4">
+        <Card className="max-w-md w-full">
+          <CardHeader>
+            <CardTitle className="text-2xl font-bold text-center">We&apos;re Working on It!</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-center text-muted-foreground mb-4">
+              The desktop version of our app is currently under development. For the best experience, please use a mobile device to access SmartFlash AI.
+            </p>
+            <p className="text-center text-sm text-muted-foreground mb-6">
+              We appreciate your patience and look forward to bringing you a fully responsive experience soon!
+            </p>
+            <div className="flex justify-center">
+              <Button asChild>
+                <Link href="/">
+                  <ArrowLeft className="mr-2 h-4 w-4" />
+                  Back to Home Page
+                </Link>
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (isMobile) {
     return (
       <div className="flex min-h-screen w-full flex-col">
-        {!isMobile && <NavBarDock />}
-        {isMobile && <MobileDock />}
-        <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 max-w-7xl mx-auto w-full">
+        <MobileDock />
+        <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 w-full">
         <Card className="w-full max-w-md mx-auto mt-auto">
           <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
             <Zap className="h-6 w-6 text-primary mr-2" />
@@ -60,7 +88,8 @@ export default function App() {
               Great to see you! <br></br> Ready for a productive session?
             </CardDescription>
           </CardContent>
-        </Card>        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2 max-w-4xl mx-auto">
+        </Card>        
+        <div className="grid grid-cols-2 sm:grid-cols-2 lg:hidden gap-2 max-w-4xl mx-auto">
         <DashboardCard
               title="Flashcards Reviewed"
               value="1,234"
@@ -87,9 +116,9 @@ export default function App() {
             />
           </div>
   
-          <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+          <div className="grid gap-4 md:hidden lg:grid-cols-2 xl:hidden">
             <StudyProgressOverview />
-            <Card className="xl:col-span-2">
+            <Card className="xl:hidden">
               <CardHeader className="flex flex-row items-center">
                 <div className="grid gap-4 md:gap-8">
                   <CardTitle>AI Study Recommendations</CardTitle>
@@ -148,10 +177,9 @@ export default function App() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       {!isMobile && <NavBarDock />}
-      {isMobile && <MobileDock />}
-      <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-800 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 max-w-7xl mx-auto w-full">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 max-w-4xl mx-auto">
-      <DashboardCard
+      <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-800 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-2 max-w-4xl mx-auto">
+          <DashboardCard
             title="Flashcards Reviewed"
             value="1,234"
             description="+15% from last week"
@@ -177,7 +205,7 @@ export default function App() {
           />
         </div>
 
-        <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
+        <div className="grid gap-4 md:gap-8 lg:hidden xl:grid-cols-3">
           <StudyProgressOverview />
           <Card className="xl:col-span-2">
             <CardHeader className="flex flex-row items-center">

@@ -97,3 +97,7 @@ html {
     height: 4rem; /* Set this to match the padding-bottom on the body */
   }
 }
+
+.special-add-button {
+  margin-top: -2rem;
+}

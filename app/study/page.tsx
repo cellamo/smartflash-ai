@@ -4,11 +4,11 @@
 import { useState, useEffect, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import Link from 'next/link';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Rotate3D, ThumbsUp, ThumbsDown, Zap, Plus, Settings, Play, Edit } from "lucide-react";
+import { Rotate3D, ThumbsUp, ThumbsDown, Zap, Plus, Settings, Play, Edit, BookOpen } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
@@ -46,7 +46,7 @@ function StudyDecks() {
 
   return (
     <>
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {decks.map((deck) => (
           <Card key={deck.id} className="flex flex-col">
             <CardHeader>
@@ -77,7 +77,7 @@ function StudyDecks() {
           </Card>
         ))}
       </div>
-      <div className="mt-8 flex flex-col sm:flex-row items-center gap-4">
+      <div className="mt-6 flex flex-col sm:flex-row items-center gap-4">
         <Input
           type="text"
           placeholder="New deck name"
@@ -104,7 +104,17 @@ function StudyContent() {
 
   return (
     <>
-      <h1 className="text-3xl font-bold text-center mb-8">Your Study Decks</h1>
+      <Card className="w-full max-w-md mx-auto mb-8">
+        <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
+          <BookOpen className="h-6 w-6 text-primary mr-2" />
+          <CardTitle className="text-xl font-bold">Study Decks</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <CardDescription className="text-center">
+            Review and manage your flashcard decks. Ready to boost your knowledge?
+          </CardDescription>
+        </CardContent>
+      </Card>
       <StudyDecks />
     </>
   );
@@ -112,11 +122,15 @@ function StudyContent() {
 
 export default function StudyPage() {
   return (
-    <div className="container mx-auto pb-14 px-4 py-10 max-w-4xl bg-slate-200">
+    <div className="flex min-h-screen w-full flex-col bg-slate-200">
       <MobileDock />
-      <Suspense fallback={<div>Loading...</div>}>
-        <StudyContent />
-      </Suspense>
+      <div className="flex-grow overflow-auto px-2 py-4 pb-2">
+          <div className="max-w-4xl mx-auto">
+            <Suspense fallback={<div>Loading...</div>}>
+              <StudyContent />
+            </Suspense>
+          </div>
+      </div>
       <Toaster />
     </div>
   );
