@@ -4,8 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { MessageSquare, Send, Bot, User, ArrowLeft, BookOpen } from "lucide-react";
-import { MobileDock } from '@/components/MobileDock';
+import { Send, Bot, User, ArrowLeft, BookOpen } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Link from 'next/link';
@@ -30,11 +29,30 @@ export default function ChatSessionPage() {
   const chatId = params.chatId as string;
   const [messages, setMessages] = useState<Message[]>(mockMessages);
   const [inputMessage, setInputMessage] = useState("");
+  const [deckName, setDeckName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    // Fetch deck information when the component mounts
+    fetchDeckInfo();
+  }, [chatId]);
+
+  const fetchDeckInfo = async () => {
+    try {
+      // In a real application, you would make an API call here
+      // For now, we'll simulate it with a timeout
+      setTimeout(() => {
+        setDeckName(`Programming Concepts`);
+      }, 500);
+    } catch (error) {
+      console.error("Error fetching deck info:", error);
+      toast.error("Failed to load deck information");
+    }
+  };
 
   const handleSendMessage = () => {
     if (inputMessage.trim()) {
@@ -63,8 +81,8 @@ export default function ChatSessionPage() {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-200">
-      <div className="flex-grow overflow-hidden px-2 py-4 pb-2">
+    <div className="flex flex-col h-screen bg-slate-200">
+      <div className="flex-grow overflow-scroll px-2 py-4">
         <div className="h-full max-w-2xl mx-auto flex flex-col">
           <Card className="mb-4">
             <CardHeader className="flex flex-row items-center justify-between pb-2">
@@ -78,6 +96,14 @@ export default function ChatSessionPage() {
                 AI Tutor Chat
               </CardTitle>
             </CardHeader>
+            {deckName && (
+              <CardContent className="pt-2">
+                <div className="flex items-center text-sm text-gray-500">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Current Deck: {deckName}
+                </div>
+              </CardContent>
+            )}
           </Card>
 
           <Card className="flex-grow flex flex-col overflow-hidden">
@@ -112,7 +138,6 @@ export default function ChatSessionPage() {
           </Card>
         </div>
       </div>
-      <MobileDock />
       <Toaster />
     </div>
   );

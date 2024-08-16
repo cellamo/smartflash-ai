@@ -90,7 +90,7 @@ useEffect(() => {
   };
 
   return (
-    <div className="container mx-auto p-4 bg-slate-200 min-h-screen">
+    <div className="container mx-auto p-4 bg-slate-200 min-h-screen pb-16">
       <Card className="mb-4">
         <CardContent className="text-center p-4">
           <h1 className="text-2xl font-bold">Studying: {deckName}</h1>

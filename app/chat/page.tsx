@@ -68,8 +68,8 @@ export default function ChatPage() {
   const totalPages = Math.ceil(chatSessions.length / sessionsPerPage);
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] bg-slate-200">
-      <div className="flex-grow overflow-hidden px-2 py-4 pb-2">
+    <div className="flex flex-col h-screen pb-20 bg-slate-200">
+      <div className="flex-grow overflow-scroll px-2 py-4 pb-2">
         <div className="h-full max-w-2xl mx-auto flex flex-col">
           <Card className="mb-4">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
@@ -98,11 +98,11 @@ export default function ChatPage() {
             </CardContent>
           </Card>
 
-          <Card className="flex-grow overflow-hidden">
+          <Card className="flex-grow overflow-scroll">
             <CardHeader>
               <CardTitle className="text-lg">Your Chat Sessions</CardTitle>
             </CardHeader>
-            <CardContent className="overflow-y-auto max-h-[calc(100vh-16rem)]"> {/* Adjust max height for scrollability */}
+            <CardContent className="overflow-y-auto ">
               {currentSessions.length > 0 ? (
                 <ul className="space-y-2">
                   {currentSessions.map((session) => (

@@ -89,7 +89,7 @@ export default function QuickAddFlashcardPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-200">
+    <div className="flex flex-col h-screen bg-slate-200 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
           <MobileDock />

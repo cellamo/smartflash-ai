@@ -89,9 +89,6 @@ html {
 }
 
 @media (max-width: 768px) {
-  body {
-    padding-bottom: 4rem; /* Adjust this value based on the height of your dock */
-  }
 
   .mobile-dock {
     height: 4rem; /* Set this to match the padding-bottom on the body */

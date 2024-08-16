@@ -122,7 +122,7 @@ function StudyContent() {
 
 export default function StudyPage() {
   return (
-    <div className="flex min-h-screen w-full flex-col bg-slate-200">
+    <div className="flex min-h-screen w-full flex-col bg-slate-200 pb-20">
       <MobileDock />
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
           <div className="max-w-4xl mx-auto">

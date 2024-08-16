@@ -75,7 +75,7 @@ export default function App() {
 
   if (isMobile) {
     return (
-      <div className="flex min-h-screen w-full flex-col">
+      <div className="flex min-h-screen w-full flex-col pb-16">
         <MobileDock />
         <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 w-full">
         <Card className="w-full max-w-md mx-auto mt-auto">
