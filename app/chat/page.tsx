@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Plus, ArrowRight, ChevronLeft, ChevronRight } from "lucide-react";
+import { MessageSquare, Plus, ArrowRight, ChevronLeft, ChevronRight, Zap } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -21,6 +22,11 @@ interface ChatSession {
   deckName: string;
   lastMessage: string;
   timestamp: string;
+}
+
+interface Profile {
+  id: string;
+  role: string;
 }
 
 const mockDecks: Deck[] = [
@@ -42,7 +48,31 @@ export default function ChatPage() {
   const [selectedDeck, setSelectedDeck] = useState<string>("");
   const [chatSessions, setChatSessions] = useState<ChatSession[]>(mockChatSessions);
   const [currentPage, setCurrentPage] = useState(1);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const sessionsPerPage = 5;
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, role')
+        .eq('id', user.id)
+        .single();
+
+      if (error) {
+        console.error('Error fetching profile:', error);
+        toast.error('Failed to fetch profile');
+      } else {
+        setProfile(data);
+      }
+    }
+  };
 
   const handleStartNewChat = () => {
     if (selectedDeck) {
@@ -80,6 +110,17 @@ export default function ChatPage() {
               <CardDescription className="text-center mb-4">
                 Start a new chat or continue an existing conversation with your AI tutor!
               </CardDescription>
+              {profile && profile.role === 'free' && (
+                <CardDescription className="text-center mb-4 text-yellow-600">
+                  You are on the free tier. Upgrade to premium for unlimited chats!
+                </CardDescription>
+              )}
+              {profile && profile.role === 'premium' && (
+                <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
+                  <Zap className="h-4 w-4 mr-2" />
+                  Premium features unlocked: Unlimited chats, priority support, and advanced AI models!
+                </CardDescription>
+              )}
               <div className="flex gap-2 mb-4">
                 <Select onValueChange={setSelectedDeck} value={selectedDeck}>
                   <SelectTrigger className="flex-grow">

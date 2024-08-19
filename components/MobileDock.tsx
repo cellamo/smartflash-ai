@@ -31,6 +31,14 @@ export function MobileDock() {
     router.push("/auth");
   };
 
+  const handleNavigation = (href: string) => {
+    if (href === '/profile' && pathname.startsWith('/study')) {
+      router.push(`${href}?refresh=true`);
+    } else {
+      router.push(href);
+    }
+  };
+
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-secondary lg:hidden">
       <div className="flex justify-around items-center h-16 relative">
@@ -42,7 +50,7 @@ export function MobileDock() {
                 <span className="text-xs">{item.label}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleNavigation('/profile')}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
@@ -57,16 +65,17 @@ export function MobileDock() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Link
+            <button
               key={item.label}
-              href={item.href}
-              className={cn(
-                "flex flex-col items-center justify-center w-full h-full",
-                item.special ? "special-add-button" : "",
+              type="button"
+              onClick={() => handleNavigation(item.href)}
+              className={`inline-flex flex-col items-center justify-center w-full h-full ${
+                item.special ? "special-add-button" : ""
+              } ${
                 !item.special && pathname === item.href
                   ? "text-primary bg-primary/10"
                   : "text-muted-foreground hover:text-primary hover:bg-primary/5"
-              )}
+              }`}
             >
               {item.special ? (
                 <div className="relative">
@@ -79,7 +88,7 @@ export function MobileDock() {
                 <item.icon className="h-5 w-5 mb-1" />
               )}
               <span className={cn("text-xs", item.special ? "sr-only" : "")}>{item.label}</span>
-            </Link>
+            </button>
           )
         ))}
       </div>

@@ -1,58 +1,76 @@
 "use client";
 
-
+import { useState, useEffect } from "react";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
-import { Flag, Eye } from "lucide-react";
-import { Pause, Play, Timer, X } from "lucide-react";
-import React, { useState, useEffect } from "react";
+import { Flag, Eye, Pause, Play, Timer, X } from "lucide-react";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { useRouter } from "next/navigation";
+import { updateStats } from '@/app/utils/studyUtils';
+import { toast } from "sonner";
 
 interface Flashcard {
-  id: number;
-  question: string;
-  answer: string;
+  id: string;
+  front: string;
+  back: string;
 }
 
-const mockFlashcards: Flashcard[] = [
-  { id: 1, question: "What is the capital of France?", answer: "Paris" },
-  {
-    id: 2,
-    question: "Who painted the Mona Lisa?",
-    answer: "Leonardo da Vinci",
-  },
-  {
-    id: 3,
-    question: "What is the largest planet in our solar system?",
-    answer: "Jupiter",
-  },
-];
-
-export default function StudyPage() {
+export default function StudyPage({ params }: { params: { id: string } }) {
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
   const [showAnswer, setShowAnswer] = useState(false);
-  const [flaggedItems, setFlaggedItems] = useState<number[]>([]);
+  const [flaggedItems, setFlaggedItems] = useState<string[]>([]);
+  const [cardsStudied, setCardsStudied] = useState(0);
+  const [studyTime, setStudyTime] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [time, setTime] = useState(0);
+  const [loading, setLoading] = useState(true);
+  const [deckName, setDeckName] = useState("");
 
   const router = useRouter();
+  const supabase = createClientComponentClient();
 
-  const currentCard = mockFlashcards[currentCardIndex];
-  const deckName = "World Geography"; // This could be dynamically fetched based on the deck ID
+  useEffect(() => {
+    fetchFlashcards();
+  }, []);
 
-  const [isPaused, setIsPaused] = useState(false);
-const [time, setTime] = useState(0);
+  const fetchFlashcards = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data: deckData, error: deckError } = await supabase
+        .from('decks')
+        .select('name')
+        .eq('id', params.id)
+        .single();
 
-useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (!isPaused) {
-      interval = setInterval(() => {
-        setTime((prevTime) => prevTime + 1);
-      }, 1000);
+      if (deckError) {
+        console.error('Error fetching deck:', deckError);
+        toast.error('Failed to load deck');
+        return;
+      }
+
+      setDeckName(deckData.name);
+
+      const { data, error } = await supabase
+        .from('flashcards')
+        .select('*')
+        .eq('deck_id', params.id);
+
+      if (error) {
+        console.error('Error fetching flashcards:', error);
+        toast.error('Failed to load flashcards');
+      } else {
+        setFlashcards(data);
+      }
     }
-    return () => clearInterval(interval);
-  }, [isPaused]);
-  
+    setLoading(false);
+  };
+
+  const currentCard = flashcards[currentCardIndex];
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -63,8 +81,6 @@ useEffect(() => {
     setIsPaused((prev) => !prev);
   };
 
-
-
   const toggleAnswer = () => {
     if (!showAnswer) {
       setShowAnswer(true);
@@ -72,8 +88,9 @@ useEffect(() => {
   };
 
   const handleNextCard = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % mockFlashcards.length);
+    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
     setShowAnswer(false);
+    setCardsStudied((prev) => prev + 1);
   };
 
   const toggleFlag = () => {
@@ -89,6 +106,38 @@ useEffect(() => {
     handleNextCard();
   };
 
+  const handleFinishStudy = async () => {
+    try {
+      await updateStats(cardsStudied, studyTime);
+      toast.success("Study session stats updated successfully!");
+      // Additional logic for finishing the study session
+      router.push('/study?sessionEnded=true');
+    } catch (error) {
+      toast.error("Failed to update study stats");
+      console.error(error);
+    }
+  };
+
+  if (loading) {
+    return <div>Loading flashcards...</div>;
+  }
+
+  if (flashcards.length === 0) {
+    return (
+      <div className="container mx-auto p-4 bg-slate-200 min-h-screen pb-16">
+        <Card className="mb-4">
+          <CardContent className="text-center p-4">
+            <h1 className="text-2xl font-bold">No Flashcards Yet</h1>
+            <p>This deck doesn&apos;t have any flashcards. Add some to start studying!</p>
+            <Button onClick={() => router.push(`/edit-deck/${params.id}`)} className="mt-4">
+              Add Flashcards
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="container mx-auto p-4 bg-slate-200 min-h-screen pb-16">
       <Card className="mb-4">
@@ -97,12 +146,12 @@ useEffect(() => {
         </CardContent>
       </Card>{" "}
       <Progress
-        value={(currentCardIndex / mockFlashcards.length) * 100}
+        value={(currentCardIndex / flashcards.length) * 100}
         className="mb-4"
       />
       <Card className="mb-4">
         <CardContent className="text-center text-2xl p-8">
-          {showAnswer ? currentCard.answer : currentCard.question}
+          {showAnswer ? currentCard.back : currentCard.front}
         </CardContent>
       </Card>
       <div className="flex flex-col items-center mb-4">
@@ -164,22 +213,7 @@ useEffect(() => {
   <AlertDialogFooter className="flex justify-between">
     <AlertDialogCancel>Cancel</AlertDialogCancel>
     <AlertDialogAction
-      onClick={() => {
-        // Save the session data
-        const sessionData = {
-          deckId: deckName,
-          duration: time,
-          cardsStudied: currentCardIndex + 1,
-          // Add any other relevant data
-        };
-
-        // Here you would typically send this data to your backend
-        // For now, we'll just log it
-        console.log('Saving session data:', sessionData);
-
-        // Navigate back to the study page
-        router.push('/study?sessionEnded=true');
-      }}
+      onClick={handleFinishStudy}
     >
       End Session
     </AlertDialogAction>

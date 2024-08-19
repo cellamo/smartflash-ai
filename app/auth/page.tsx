@@ -28,6 +28,7 @@ export default function AuthPage() {
         emailRedirectTo: `${location.origin}/auth/callback`,
         data: {
           full_name: name,
+          role: 'free', // Set default role to 'free'
         }
       },
     });
@@ -39,7 +40,7 @@ export default function AuthPage() {
       if (data.user) {
         const { error: profileError } = await supabase
           .from('profiles')
-          .upsert({ id: data.user.id, full_name: name });
+          .upsert({ id: data.user.id, full_name: name, role: 'free' });
         if (profileError) {
           console.error('Error creating profile:', profileError);
         }

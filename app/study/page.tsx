@@ -2,47 +2,99 @@
 "use client";
 
 import { useState, useEffect, Suspense } from 'react';
-import { motion } from 'framer-motion';
 import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
-import { Rotate3D, ThumbsUp, ThumbsDown, Zap, Plus, Settings, Play, Edit, BookOpen } from "lucide-react";
+import { Plus, Settings, Play, Edit, BookOpen } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { useSearchParams } from 'next/navigation';
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 
 interface Deck {
-  id: number;
+  id: string;
   name: string;
-  cardCount: number;
-  lastStudied: string;
+  card_count: number;
+  last_studied: string | null;
 }
 
-const mockDecks: Deck[] = [
-  { id: 1, name: "General Knowledge", cardCount: 50, lastStudied: "2 days ago" },
-  { id: 2, name: "Programming Concepts", cardCount: 100, lastStudied: "1 week ago" },
-  { id: 3, name: "Spanish Vocabulary", cardCount: 200, lastStudied: "3 days ago" },
-];
-
 function StudyDecks() {
-  const [decks, setDecks] = useState<Deck[]>(mockDecks);
+  const [decks, setDecks] = useState<Deck[]>([]);
   const [newDeckName, setNewDeckName] = useState("");
+  const [loading, setLoading] = useState(true);
+  const supabase = createClientComponentClient();
 
-  const createNewDeck = () => {
+  useEffect(() => {
+    fetchDecks();
+  }, []);
+
+  const fetchDecks = async () => {
+    setLoading(true);
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('decks')
+        .select('*')
+        .eq('user_id', user.id);
+      if (error) {
+        console.error('Error fetching decks:', error);
+        toast.error('Failed to load decks');
+      } else {
+        setDecks(data);
+      }
+    }
+    setLoading(false);
+  };
+
+  const createNewDeck = async () => {
     if (newDeckName.trim()) {
-      const newDeck: Deck = {
-        id: decks.length + 1,
-        name: newDeckName,
-        cardCount: 0,
-        lastStudied: "Never"
-      };
-      setDecks([...decks, newDeck]);
-      setNewDeckName("");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('decks')
+          .insert({ name: newDeckName, user_id: user.id })
+          .select()
+          .single();
+        if (error) {
+          console.error('Error creating deck:', error);
+          toast.error('Failed to create deck');
+        } else {
+          setDecks([...decks, data]);
+          setNewDeckName("");
+          toast.success('Deck created successfully');
+        }
+      }
     }
   };
+
+  if (loading) {
+    return <div>Loading decks...</div>;
+  }
+
+  if (decks.length === 0) {
+    return (
+      <Card className="text-center p-6">
+        <CardHeader>
+          <CardTitle>No Decks Yet</CardTitle>
+          <CardDescription>Start by creating your first deck!</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Input
+            type="text"
+            placeholder="New deck name"
+            value={newDeckName}
+            onChange={(e) => setNewDeckName(e.target.value)}
+            className="mb-4"
+          />
+          <Button onClick={createNewDeck}>
+            <Plus className="mr-2 h-4 w-4" /> Create Your First Deck
+          </Button>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <>
@@ -54,7 +106,7 @@ function StudyDecks() {
             </CardHeader>
             <CardContent className="flex-grow">
               <p className="text-sm text-muted-foreground mb-4">
-                {deck.cardCount} cards • Last studied: {deck.lastStudied}
+                {deck.card_count} cards • Last studied: {deck.last_studied || 'Never'}
               </p>
               <div className="flex flex-wrap gap-2">
                 <Button variant="outline" size="sm" asChild>

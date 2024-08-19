@@ -21,6 +21,20 @@ export async function middleware(req: NextRequest) {
     return NextResponse.redirect(new URL('/auth', req.url))
   }
 
+  // Check user role
+  const userRole = session?.user?.user_metadata?.role || 'free';
+
+  // List of premium routes
+  const premiumRoutes = ['/premium-feature']
+
+  // Check if the current path is a premium route
+  const isPremiumRoute = premiumRoutes.some(route => req.nextUrl.pathname.startsWith(route))
+
+  // If the route is premium and the user is not premium, redirect to upgrade page
+  if (isPremiumRoute && userRole == 'free') {
+    return NextResponse.redirect(new URL('/', req.url))
+  }
+
   return res
 }
 
