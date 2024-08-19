@@ -1,6 +1,6 @@
 "use client";
 import { ChevronsDown, Github, Menu, Zap, LogIn, Rocket } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -24,6 +24,8 @@ import Image from "next/image";
 import { ToggleTheme } from "./toogle-theme";
 import { ModeToggle } from "../ui/mode-toggle";
 import { useRouter } from "next/navigation";
+import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { User } from '@supabase/supabase-js';
 
 interface RouteProps {
   href: string;
@@ -69,6 +71,22 @@ export const Navbar = () => {
   const [isOpen, setIsOpen] = React.useState(false);
   const [isLoggedIn, setIsLoggedIn] = React.useState(true);
   const router = useRouter();
+  const [user, setUser] = useState<User | null>(null);
+  const supabase = createClientComponentClient();
+
+  useEffect(() => {
+    const checkUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUser(user);
+    };
+    checkUser();
+  }, [supabase.auth]);
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    router.push('/');
+  };
 
   const handleLaunchApp = () => {
     router.push("/app");
@@ -80,6 +98,10 @@ export const Navbar = () => {
       featuresSection.scrollIntoView({ behavior: 'smooth' });
     }
     setIsOpen(false);
+  };
+
+  const handleAuth = () => {
+    router.push("/auth");
   };
 
   return (
@@ -209,24 +231,36 @@ export const Navbar = () => {
       </NavigationMenu>
 
       <div className="hidden lg:flex items-center space-x-2">
-
-  {!isLoggedIn ? (
-    <Button variant="outline" size="sm" className="flex items-center">
-      <LogIn className="mr-2 h-4 w-4" />
-      Login / Signup
-    </Button>
-  ) : (
-    <Button
-      size="sm"
-      onClick={handleLaunchApp}
-      className="bg-gradient-to-r from-slate-400 to-slate-600 text-white hover:from-slate-500 hover:to-slate-700 flex items-center"
-    >
-      <Rocket className="mr-2 h-4 w-4" />
-      Launch App
-    </Button>
-  )}
-  <ModeToggle />
-</div>
+        {user ? (
+          <>
+            <Button
+              size="sm"
+              onClick={handleLaunchApp}
+              className="bg-gradient-to-r from-slate-400 to-slate-600 text-white hover:from-slate-500 hover:to-slate-700 flex items-center"
+            >
+              <Rocket className="mr-2 h-4 w-4" />
+              Launch App
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleLogout}
+              variant="outline"
+            >
+              Logout
+            </Button>
+          </>
+        ) : (
+          <Button
+            size="sm"
+            onClick={handleAuth}
+            className="bg-gradient-to-r from-slate-400 to-slate-600 text-white hover:from-slate-500 hover:to-slate-700 flex items-center"
+          >
+            <LogIn className="mr-2 h-4 w-4" />
+            Login / Signup
+          </Button>
+        )}
+        <ModeToggle />
+      </div>
     </header>
   );
 };

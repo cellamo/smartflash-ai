@@ -1,7 +1,9 @@
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
-import { Brain, Target, Zap } from "lucide-react";
+import { Brain, Target, Zap, BarChart2 } from "lucide-react";
+import { Button } from './ui/button';
+import Link from 'next/link';
 
 const StudyProgressOverview: React.FC = () => {
   return (
@@ -46,6 +48,21 @@ const StudyProgressOverview: React.FC = () => {
           </div>
         </div>
       </CardContent>
+      <Card className="w-full max-w-md mx-auto">
+        <CardHeader className="flex flex-col items-center justify-center pb-2">
+          <Button asChild size="sm">
+            <Link href="/progress" className="flex items-center">
+              <BarChart2 className="h-4 w-4 mr-2" />
+              View Progress
+            </Link>
+          </Button>
+        </CardHeader>
+        <CardContent>
+          <CardDescription className="text-center">
+            Track your learning journey and see your improvements over time.
+          </CardDescription>
+        </CardContent>
+      </Card>
     </Card>
   );
 };
