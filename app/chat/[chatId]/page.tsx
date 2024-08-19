@@ -4,81 +4,144 @@ import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Send, Bot, User, ArrowLeft, BookOpen } from "lucide-react";
+import { Send, Bot, User, ArrowLeft, BookOpen, Loader2 } from "lucide-react";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+
 
 interface Message {
-  id: number;
-  text: string;
-  sender: 'user' | 'ai';
+  role: 'user' | 'assistant';
+  content: string;
 }
 
-const mockMessages: Message[] = [
-  { id: 1, text: "Hello! I'd like to learn about programming concepts.", sender: 'user' },
-  { id: 2, text: "Great! I'd be happy to help you with programming concepts. What specific topic would you like to start with?", sender: 'ai' },
-  { id: 3, text: "Can you explain what object-oriented programming is?", sender: 'user' },
-  { id: 4, text: "Certainly! Object-Oriented Programming (OOP) is a programming paradigm based on the concept of 'objects', which can contain data and code. The data is in the form of fields (often known as attributes or properties), and the code is in the form of procedures (often known as methods).\n\nKey concepts in OOP include:\n\n1. Classes: Blueprints for creating objects.\n2. Objects: Instances of classes.\n3. Encapsulation: Bundling data and methods that operate on that data within a single unit.\n4. Inheritance: A mechanism where a new class is derived from an existing class.\n5. Polymorphism: The ability of different classes to be treated as instances of the same class through inheritance.\n\nWould you like me to elaborate on any of these concepts?", sender: 'ai' },
-  { id: 5, text: "That's helpful, thanks! Can you give an example of inheritance?", sender: 'user' },
-];
-
 export default function ChatSessionPage() {
-  const params = useParams();
-  const chatId = params.chatId as string;
-  const [messages, setMessages] = useState<Message[]>(mockMessages);
-  const [inputMessage, setInputMessage] = useState("");
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [tokenCount, setTokenCount] = useState(0);
   const [deckName, setDeckName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const supabase = createClientComponentClient();
+  const { chatId } = useParams();
+
+  const [flashcards, setFlashcards] = useState<string | null>(null);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
   useEffect(() => {
-    // Fetch deck information when the component mounts
     fetchDeckInfo();
   }, [chatId]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (input.trim() === '') return;
+  
+    const newMessage: Message = { role: 'user', content: input };
+    setMessages((prev) => {
+      const updatedMessages = [...prev, newMessage];
+      updateChatSession(updatedMessages);
+      return updatedMessages;
+    });
+    setInput('');
+    setIsLoading(true);
+  
+    try {
+      const response = await fetch('/api/assistant', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          messages: [...messages, newMessage],
+          flashcards: JSON.parse(flashcards || '[]'),
+          chatId
+        }),
+      });
+  
+      if (!response.ok) throw new Error(response.statusText);
+  
+      const data = response.body;
+      if (!data) return;
+  
+      const reader = data.getReader();
+      const decoder = new TextDecoder();
+      let done = false;
+      let accumulatedResponse = '';
+  
+      while (!done) {
+        const { value, done: doneReading } = await reader.read();
+        done = doneReading;
+        const chunkValue = decoder.decode(value);
+        accumulatedResponse += chunkValue;
+        setMessages((prev) => [
+          ...prev,
+          { role: 'assistant', content: accumulatedResponse },
+        ]);        
+      }
+  
+      setTokenCount((prev) => prev + input.split(' ').length + accumulatedResponse.split(' ').length);
+  
+      if (tokenCount > 7500) {
+        toast.warning('You are approaching the token limit. Please start a new chat soon.');
+      }
+  
+    } catch (error) {
+      console.error('Error:', error);
+      toast.error('Failed to send message');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const fetchDeckInfo = async () => {
     try {
-      // In a real application, you would make an API call here
-      // For now, we'll simulate it with a timeout
-      setTimeout(() => {
-        setDeckName(`Programming Concepts`);
-      }, 500);
+      const { data: chatSession, error: chatError } = await supabase
+        .from('chat_sessions')
+        .select('deck_id, messages')
+        .eq('id', chatId)
+        .single();
+  
+      if (chatError) throw chatError;
+  
+      const { data: deck, error: deckError } = await supabase
+        .from('decks')
+        .select('name, flashcards(front, back, notes)')
+        .eq('id', chatSession.deck_id)
+        .single();
+  
+      if (deckError) throw deckError;
+
+      if (chatSession.messages) {
+        setMessages(JSON.parse(chatSession.messages));
+      }      
+  
+      setDeckName(deck.name);
+      setMessages(chatSession.messages || []);
+
+      const optimizedFlashcards = deck.flashcards.map(({ front, back }) => [front, back]);
+      setFlashcards(JSON.stringify(optimizedFlashcards));
+  
     } catch (error) {
       console.error("Error fetching deck info:", error);
       toast.error("Failed to load deck information");
     }
   };
 
-  const handleSendMessage = () => {
-    if (inputMessage.trim()) {
-      const newMessage: Message = {
-        id: Date.now(),
-        text: inputMessage.trim(),
-        sender: 'user',
-      };
-      setMessages([...messages, newMessage]);
-      setInputMessage("");
-      simulateAIResponse();
-    } else {
-      toast.error("Please enter a message.");
+  const updateChatSession = async (messages: Message[]) => {
+    const { error } = await supabase
+      .from('chat_sessions')
+      .update({ messages: JSON.stringify(messages) })
+      .eq('id', chatId);
+  
+    if (error) {
+      console.error('Error updating chat session:', error);
+      toast.error('Failed to save chat history');
     }
-  };
-
-  const simulateAIResponse = () => {
-    setTimeout(() => {
-      const aiMessage: Message = {
-        id: Date.now(),
-        text: "This is a simulated AI response. In a real application, this would be generated based on the selected deck and user input.",
-        sender: 'ai',
-      };
-      setMessages(prevMessages => [...prevMessages, aiMessage]);
-    }, 1000);
-  };
+  };  
+  
 
   return (
     <div className="flex flex-col h-screen bg-slate-200">
@@ -108,32 +171,33 @@ export default function ChatSessionPage() {
 
           <Card className="flex-grow flex flex-col overflow-hidden">
             <CardContent className="flex-grow overflow-y-auto p-4">
-              {messages.map((message) => (
-                <div key={message.id} className={`flex ${message.sender === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
-                  <div className={`max-w-[70%] p-3 rounded-lg ${message.sender === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
-                    <div className="flex items-center mb-1">
-                      {message.sender === 'user' ? <User className="h-4 w-4 mr-2" /> : <Bot className="h-4 w-4 mr-2" />}
-                      <span className="font-bold">{message.sender === 'user' ? 'You' : 'AI Tutor'}</span>
-                    </div>
-                    {message.text}
-                  </div>
-                </div>
-              ))}
+            {messages.map((message, index) => (
+  <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} mb-4`}>
+    <div className={`max-w-[70%] p-3 rounded-lg ${message.role === 'user' ? 'bg-blue-500 text-white' : 'bg-gray-200 text-black'}`}>
+      <div className="flex items-center mb-1">
+        {message.role === 'user' ? <User className="h-4 w-4 mr-2" /> : <Bot className="h-4 w-4 mr-2" />}
+        <span className="font-bold">{message.role === 'user' ? 'You' : 'AI Tutor'}</span>
+      </div>
+      {message.content}
+    </div>
+  </div>
+))}
+
               <div ref={messagesEndRef} />
             </CardContent>
             <CardContent className="p-4 border-t">
-              <div className="flex gap-2">
+              <form onSubmit={handleSubmit} className="flex gap-2">
                 <Input
                   type="text"
                   placeholder="Type your message..."
-                  value={inputMessage}
-                  onChange={(e) => setInputMessage(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  disabled={isLoading}
                 />
-                <Button onClick={handleSendMessage}>
-                  <Send className="h-4 w-4 mr-2" /> Send
+                <Button type="submit" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
                 </Button>
-              </div>
+              </form>
             </CardContent>
           </Card>
         </div>

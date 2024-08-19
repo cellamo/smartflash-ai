@@ -1,15 +1,35 @@
 "use client";
 
-import { useEffect, useState } from 'react';
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { useEffect, useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MessageSquare, Plus, ArrowRight, ChevronLeft, ChevronRight, Zap } from "lucide-react";
-import { MobileDock } from '@/components/MobileDock';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  ArrowRight,
+  ChevronLeft,
+  ChevronRight,
+  MessageSquare,
+  Plus,
+  Trash2,
+  Zap,
+} from "lucide-react";
+import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import Link from 'next/link';
+import Link from "next/link";
 
 interface Deck {
   id: string;
@@ -18,10 +38,10 @@ interface Deck {
 
 interface ChatSession {
   id: string;
-  deckId: string;
-  deckName: string;
-  lastMessage: string;
-  timestamp: string;
+  deck_id: string;
+  user_id: string;
+  created_at: string;
+  last_message: string;
 }
 
 interface Profile {
@@ -29,71 +49,131 @@ interface Profile {
   role: string;
 }
 
-const mockDecks: Deck[] = [
-  { id: "1", name: "General Knowledge" },
-  { id: "2", name: "Programming Concepts" },
-  { id: "3", name: "Spanish Vocabulary" },
-];
-
-const mockChatSessions: ChatSession[] = [
-  { id: "chat1", deckId: "2", deckName: "Programming Concepts", lastMessage: "Can you explain inheritance?", timestamp: "2023-04-15 14:30" },
-  { id: "chat2", deckId: "3", deckName: "Spanish Vocabulary", lastMessage: "How do you say 'hello' in Spanish?", timestamp: "2023-04-14 09:15" },
-  { id: "chat3", deckId: "1", deckName: "General Knowledge", lastMessage: "What's the capital of France?", timestamp: "2023-04-13 11:45" },
-  { id: "chat4", deckId: "2", deckName: "Programming Concepts", lastMessage: "Explain async/await in JavaScript", timestamp: "2023-04-12 16:20" },
-  { id: "chat5", deckId: "3", deckName: "Spanish Vocabulary", lastMessage: "How to conjugate 'ser' in present tense?", timestamp: "2023-04-11 10:00" },
-  { id: "chat6", deckId: "1", deckName: "General Knowledge", lastMessage: "Who wrote 'To Kill a Mockingbird'?", timestamp: "2023-04-10 13:50" },
-];
-
 export default function ChatPage() {
+  const [decks, setDecks] = useState<Deck[]>([]);
   const [selectedDeck, setSelectedDeck] = useState<string>("");
-  const [chatSessions, setChatSessions] = useState<ChatSession[]>(mockChatSessions);
+  const [chatSessions, setChatSessions] = useState<ChatSession[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [profile, setProfile] = useState<Profile | null>(null);
   const sessionsPerPage = 5;
   const supabase = createClientComponentClient();
+  const [filter, setFilter] = useState<string>("");
 
   useEffect(() => {
     fetchProfile();
+    fetchDecks();
+    fetchChatSessions();
   }, []);
 
   const fetchProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
     if (user) {
       const { data, error } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', user.id)
+        .from("profiles")
+        .select("id, role")
+        .eq("id", user.id)
         .single();
 
       if (error) {
-        console.error('Error fetching profile:', error);
-        toast.error('Failed to fetch profile');
+        console.error("Error fetching profile:", error);
+        toast.error("Failed to fetch profile");
       } else {
         setProfile(data);
       }
     }
   };
 
-  const handleStartNewChat = () => {
+  const fetchDecks = async () => {
+    const { data, error } = await supabase.from("decks").select("id, name");
+
+    if (error) {
+      console.error("Error fetching decks:", error);
+      toast.error("Failed to fetch decks");
+    } else {
+      setDecks(data);
+    }
+  };
+
+  const fetchChatSessions = async () => {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from("chat_sessions")
+        .select("*")
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching chat sessions:", error);
+        toast.error("Failed to fetch chat sessions");
+      } else {
+        setChatSessions(data);
+      }
+    }
+  };
+
+  const handleStartNewChat = async () => {
     if (selectedDeck) {
-      const selectedDeckName = mockDecks.find(deck => deck.id === selectedDeck)?.name;
-      const newChatSession: ChatSession = {
-        id: `chat${Date.now()}`,
-        deckId: selectedDeck,
-        deckName: selectedDeckName || "",
-        lastMessage: "New conversation started",
-        timestamp: new Date().toLocaleString(),
-      };
-      setChatSessions([newChatSession, ...chatSessions]);
-      toast.success("New chat session started!");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        if (profile?.role === 'free' && chatSessions.length >= 3) {
+          toast.error("Free users can only create up to 3 chats. Upgrade to premium for unlimited chats!");
+          return;
+        }
+  
+        const { data, error } = await supabase
+          .from('chat_sessions')
+          .insert({
+            user_id: user.id,
+            deck_id: selectedDeck,
+            last_message: "New conversation started"
+          })
+          .select()
+          .single();
+  
+        if (error) {
+          console.error('Error creating new chat session:', error);
+          toast.error('Failed to start new chat session');
+        } else {
+          setChatSessions([data, ...chatSessions]);
+          toast.success("New chat session started!");
+        }
+      }
     } else {
       toast.error("Please select a deck to start a new chat.");
     }
   };
 
+  const handleDeleteChat = async (chatId: string) => {
+    if (profile?.role !== 'premium') {
+      toast.error("Only premium users can delete chats.");
+      return;
+    }
+  
+    const { error } = await supabase
+      .from('chat_sessions')
+      .delete()
+      .eq('id', chatId);
+  
+    if (error) {
+      console.error('Error deleting chat session:', error);
+      toast.error('Failed to delete chat session');
+    } else {
+      setChatSessions(chatSessions.filter(session => session.id !== chatId));
+      toast.success("Chat session deleted successfully!");
+    }
+  };
+
   const indexOfLastSession = currentPage * sessionsPerPage;
   const indexOfFirstSession = indexOfLastSession - sessionsPerPage;
-  const currentSessions = chatSessions.slice(indexOfFirstSession, indexOfLastSession);
+  const currentSessions = chatSessions.slice(
+    indexOfFirstSession,
+    indexOfLastSession
+  );
 
   const totalPages = Math.ceil(chatSessions.length / sessionsPerPage);
 
@@ -104,38 +184,51 @@ export default function ChatPage() {
           <Card className="mb-4">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
               <MessageSquare className="h-6 w-6 text-primary mr-2" />
-              <CardTitle className="text-xl font-bold">AI Tutor Chats</CardTitle>
+              <CardTitle className="text-xl font-bold">
+                AI Tutor Chats
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <CardDescription className="text-center mb-4">
-                Start a new chat or continue an existing conversation with your AI tutor!
+                Start a new chat or continue an existing conversation with your
+                AI tutor!
               </CardDescription>
-              {profile && profile.role === 'free' && (
+              {profile && profile.role === "free" && (
                 <CardDescription className="text-center mb-4 text-yellow-600">
-                  You are on the free tier. Upgrade to premium for unlimited chats!
+                  You are on the free tier. Upgrade to premium for unlimited
+                  chats!
                 </CardDescription>
               )}
-              {profile && profile.role === 'premium' && (
+              {profile && profile.role === "premium" && (
                 <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
                   <Zap className="h-4 w-4 mr-2" />
-                  Premium features unlocked: Unlimited chats, priority support, and advanced AI models!
+                  Premium features unlocked: Unlimited chats, priority support,
+                  and advanced AI models!
                 </CardDescription>
               )}
               <div className="flex gap-2 mb-4">
-                <Select onValueChange={setSelectedDeck} value={selectedDeck}>
-                  <SelectTrigger className="flex-grow">
-                    <SelectValue placeholder="Select a deck" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {mockDecks.map((deck) => (
-                      <SelectItem key={deck.id} value={deck.id}>{deck.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <Button onClick={handleStartNewChat}>
-                  <Plus className="h-4 w-4 mr-2" /> New Chat
-                </Button>
-              </div>
+  <Select onValueChange={setSelectedDeck} value={selectedDeck}>
+    <SelectTrigger className="flex-grow">
+      <SelectValue placeholder="Select a deck" />
+    </SelectTrigger>
+    <SelectContent>
+      {decks.map((deck) => (
+        <SelectItem key={deck.id} value={deck.id}>{deck.name}</SelectItem>
+      ))}
+    </SelectContent>
+  </Select>
+  <Button onClick={handleStartNewChat}>
+    <Plus className="h-4 w-4 mr-2" /> New Chat
+  </Button>
+</div>
+<div className="mb-4">
+  <input
+    type="text"
+    placeholder="Filter by deck name"
+    className="w-full p-2 border rounded"
+    onChange={(e) => setFilter(e.target.value)}
+  />
+</div>
             </CardContent>
           </Card>
 
@@ -144,48 +237,65 @@ export default function ChatPage() {
               <CardTitle className="text-lg">Your Chat Sessions</CardTitle>
             </CardHeader>
             <CardContent className="overflow-y-auto ">
-              {currentSessions.length > 0 ? (
-                <ul className="space-y-2">
-                  {currentSessions.map((session) => (
-                    <li key={session.id}>
-                      <Link href={`/chat/${session.id}`}>
-                        <Card className="hover:bg-slate-100 transition-colors">
-                          <CardContent className="p-4">
-                            <div className="flex justify-between items-center">
-                              <div>
-                                <h3 className="font-semibold">{session.deckName}</h3>
-                                <p className="text-sm text-muted-foreground">{session.lastMessage}</p>
-                              </div>
-                              <div className="flex items-center">
-                                <span className="text-xs text-muted-foreground mr-2">{session.timestamp}</span>
-                                <ArrowRight className="h-4 w-4" />
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="text-center text-muted-foreground">No chat sessions yet. Start a new chat to begin!</p>
+            {currentSessions
+  .filter(session => {
+    const deckName = decks.find(deck => deck.id === session.deck_id)?.name || '';
+    return deckName.toLowerCase().includes(filter.toLowerCase());
+  })
+  .map((session) => (
+    <div key={session.id} className="list-none">
+      <Card className="hover:bg-slate-100 transition-colors">
+        <CardContent className="p-4">
+          <div className="flex justify-between items-center">
+            <Link href={`/chat/${session.id}`} className="flex-grow">
+              <div>
+                <h3 className="font-semibold">
+                  {decks.find(deck => deck.id === session.deck_id)?.name || 'Unknown Deck'}
+                </h3>
+                <p className="text-sm text-muted-foreground">{session.last_message}</p>
+              </div>
+            </Link>
+            <div className="flex items-center">
+              <span className="text-xs text-muted-foreground mr-2">
+                {new Date(session.created_at).toLocaleString()}
+              </span>
+              {profile?.role === 'premium' && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => handleDeleteChat(session.id)}
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               )}
+              <ArrowRight className="h-4 w-4" />
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  ))}
+
             </CardContent>
           </Card>
 
           {totalPages > 1 && (
             <div className="flex justify-center items-center mt-4 space-x-2">
               <Button
-                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
                 disabled={currentPage === 1}
                 variant="outline"
                 size="sm"
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
-              <span>{currentPage} / {totalPages}</span>
+              <span>
+                {currentPage} / {totalPages}
+              </span>
               <Button
-                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                onClick={() =>
+                  setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+                }
                 disabled={currentPage === totalPages}
                 variant="outline"
                 size="sm"
