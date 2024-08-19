@@ -10,7 +10,14 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
-  if (!session && req.nextUrl.pathname !== '/auth') {
+  // List of public routes that don't require authentication
+  const publicRoutes = ['/', '/auth']
+
+  // Check if the current path is a public route
+  const isPublicRoute = publicRoutes.includes(req.nextUrl.pathname)
+
+  // If the route is not public and there's no session, redirect to auth page
+  if (!isPublicRoute && !session) {
     return NextResponse.redirect(new URL('/auth', req.url))
   }
 
