@@ -101,7 +101,7 @@ export const Navbar = () => {
   };
 
   const handleAuth = () => {
-    router.push("/auth");
+    window.location.href = "/auth";
   };
 
   return (
