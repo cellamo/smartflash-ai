@@ -58,7 +58,12 @@ export default function AuthPage() {
       if (data.user) {
         const { error: profileError } = await supabase
           .from("profiles")
-          .upsert({ id: data.user.id, full_name: name, role: "free" });
+          .upsert({ 
+            id: data.user.id, 
+            full_name: name, 
+            role: "free",
+            email: data.user.email 
+          });
         if (profileError) {
           console.error("Error creating profile:", profileError);
         }
