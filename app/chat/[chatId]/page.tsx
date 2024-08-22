@@ -21,12 +21,14 @@ export default function ChatSessionPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [tokenCount, setTokenCount] = useState(0);
+  const [tokenCount, setTokenCount] = useState(1);
   const [deckName, setDeckName] = useState<string | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient();
   const { chatId } = useParams();
   const router = useRouter();
+
+  const [isDisabled, setIsDisabled] = useState(false);
 
   const [flashcards, setFlashcards] = useState<string | null>(null);
 
@@ -38,6 +40,13 @@ export default function ChatSessionPage() {
     checkUserRole();
     fetchDeckInfo();
   }, [chatId]);
+
+  useEffect(() => {
+    if (tokenCount > 8000) {
+      setIsDisabled(true);
+      toast.error('Token limit reached. Please start a new chat.');
+    }
+  }, [tokenCount]);
 
   const checkUserRole = async () => {
     const { data: { user } } = await supabase.auth.getUser();
@@ -59,7 +68,7 @@ export default function ChatSessionPage() {
   };
 const handleSubmit = async (e: React.FormEvent) => {
   e.preventDefault();
-  if (input.trim() === '') return;
+  if (input.trim() === '' || isDisabled) return;
 
   const newMessage: Message = { role: 'user', content: input };
   setMessages((prev) => [...prev, newMessage]);
@@ -83,6 +92,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (reader) {
       let accumulatedResponse = '';
+      let newTokenCount = tokenCount;
       setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
       while (true) {
@@ -91,21 +101,26 @@ const handleSubmit = async (e: React.FormEvent) => {
         const chunk = decoder.decode(value);
         
         if (chunk.includes('[TOKEN_COUNT:')) {
-          const tokenCount = parseInt(chunk.match(/\[TOKEN_COUNT:(\d+)\]/)?.[1] || '0');
-          setTokenCount(tokenCount);
+          newTokenCount = parseInt(chunk.match(/\[TOKEN_COUNT:(\d+)\]/)?.[1] || '0');
+          setTokenCount(newTokenCount);
           break;
         } else {
           accumulatedResponse += chunk;
           setMessages((prev) => {
             const updatedMessages = [...prev];
             updatedMessages[updatedMessages.length - 1].content = accumulatedResponse;
-            updateChatSession(updatedMessages);
             return updatedMessages;
           });
         }
       }
 
-      if (tokenCount > 7500) {
+      // Update the chat session with new messages and token count
+      updateChatSession([...messages, newMessage, { role: 'assistant', content: accumulatedResponse }], newTokenCount);
+
+      if (newTokenCount > 8000) {
+        setIsDisabled(true);
+        toast.error('Token limit reached. Please start a new chat.');
+      } else if (newTokenCount > 7500) {
         toast.warning('You are approaching the token limit. Please start a new chat soon.');
       }
     }
@@ -121,7 +136,7 @@ const handleSubmit = async (e: React.FormEvent) => {
     try {
       const { data: chatSession, error: chatError } = await supabase
         .from('chat_sessions')
-        .select('deck_id, messages')
+        .select('deck_id, messages, token_count')
         .eq('id', chatId)
         .single();
 
@@ -140,6 +155,8 @@ const handleSubmit = async (e: React.FormEvent) => {
         setMessages(JSON.parse(chatSession.messages));
       }
 
+      setTokenCount(chatSession.token_count || 1);
+
       const optimizedFlashcards = deck.flashcards.map(({ front, back }) => [front, back]);
       setFlashcards(JSON.stringify(optimizedFlashcards));
 
@@ -149,10 +166,10 @@ const handleSubmit = async (e: React.FormEvent) => {
     }
   };
 
-  const updateChatSession = async (messages: Message[]) => {
+  const updateChatSession = async (messages: Message[], newTokenCount: number) => {
     const { error } = await supabase
       .from('chat_sessions')
-      .update({ messages: JSON.stringify(messages) })
+      .update({ messages: JSON.stringify(messages), token_count: newTokenCount })
       .eq('id', chatId);
 
     if (error) {
@@ -209,18 +226,18 @@ const handleSubmit = async (e: React.FormEvent) => {
                 Token count: {tokenCount}
               </div>
               <form onSubmit={handleSubmit} className="flex gap-2">
-                <Input
-                  type="text"
-                  placeholder="Type your message..."
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  disabled={isLoading}
-                />
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
-                </Button>
-              </form>
-            </CardContent>
+          <Input
+            type="text"
+            placeholder={isDisabled ? "Token limit reached. Start a new chat." : "Type your message..."}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            disabled={isLoading || isDisabled}
+          />
+          <Button type="submit" disabled={isLoading || isDisabled}>
+            {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
+          </Button>
+        </form>
+      </CardContent>
           </Card>
         </div>
       </div>
