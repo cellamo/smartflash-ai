@@ -1,4 +1,3 @@
-// components/MobileDock.tsx
 "use client";
 
 import Link from "next/link";
@@ -28,7 +27,7 @@ export function MobileDock() {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    router.push("/auth");
+    window.location.href = "/auth";
   };
 
   const handleNavigation = (href: string) => {

@@ -16,7 +16,9 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast, Toaster } from "sonner";
-import { Zap, Eye, EyeOff } from "lucide-react";
+
+import { Zap, Eye, EyeOff, ArrowLeft } from "lucide-react";
+import Link from "next/link";
 
 export default function AuthPage() {
   const [email, setEmail] = useState("");
@@ -91,6 +93,10 @@ export default function AuthPage() {
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-200 to-slate-300 dark:from-slate-800 dark:to-slate-900 p-4">
+      <Link href="/" className="absolute top-4 left-4 text-primary hover:text-primary/80">
+        <ArrowLeft className="h-6 w-6" />
+        <span className="sr-only">Return to main page</span>
+      </Link>
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1">
           <div className="flex items-center justify-center space-x-2">

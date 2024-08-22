@@ -159,12 +159,7 @@ export const Navbar = () => {
             <SheetFooter className="flex-col sm:flex-col justify-start items-start">
   <Separator className="mb-2" />
   <ModeToggle />
-  {!isLoggedIn ? (
-    <Button variant="outline" size="sm" className="mt-2 w-full flex items-center justify-center">
-      <LogIn className="mr-2 h-4 w-4" />
-      Login / Signup
-    </Button>
-  ) : (
+  {user ? (
     <Button
       size="sm"
       onClick={handleLaunchApp}
@@ -173,9 +168,18 @@ export const Navbar = () => {
       <Rocket className="mr-2 h-4 w-4" />
       Launch App
     </Button>
+  ) : (
+    <Button 
+      variant="outline" 
+      size="sm" 
+      className="mt-2 w-full flex items-center justify-center"
+      onClick={handleAuth}
+    >
+      <LogIn className="mr-2 h-4 w-4" />
+      Login / Signup
+    </Button>
   )}
-</SheetFooter>
-          </SheetContent>
+</SheetFooter>          </SheetContent>
         </Sheet>
       </div>
 
