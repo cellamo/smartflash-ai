@@ -177,6 +177,37 @@ export default function ChatPage() {
 
   const totalPages = Math.ceil(chatSessions.length / sessionsPerPage);
 
+  if (profile && profile.role === "free") {
+    return (
+      <div className="flex flex-col h-screen pb-20 bg-slate-200">
+        <div className="flex-grow overflow-scroll px-2 py-4 pb-2">
+          <div className="h-full max-w-2xl mx-auto flex flex-col">
+            <Card className="mb-4">
+              <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
+                <MessageSquare className="h-6 w-6 text-primary mr-2" />
+                <CardTitle className="text-xl font-bold">
+                  AI Tutor Chats
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <CardDescription className="text-center mb-4 text-yellow-600">
+                  You are on the free tier. Upgrade to premium to unlock AI Tutor Chats!
+                </CardDescription>
+                <Link href="/app" className="w-full">
+                  <Button className="w-full">
+                    <Zap className="h-4 w-4 mr-2" /> Upgrade to Premium
+                  </Button>
+                </Link>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+        <MobileDock />
+        <Toaster />
+      </div>
+    );
+  }
+
   return (
     <div className="flex flex-col h-screen pb-20 bg-slate-200">
       <div className="flex-grow overflow-scroll px-2 py-4 pb-2">

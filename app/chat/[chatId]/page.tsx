@@ -10,7 +10,7 @@ import { toast } from "sonner";
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-
+import { useRouter } from 'next/navigation';
 
 interface Message {
   role: 'user' | 'assistant';
@@ -26,6 +26,7 @@ export default function ChatSessionPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const supabase = createClientComponentClient();
   const { chatId } = useParams();
+  const router = useRouter();
 
   const [flashcards, setFlashcards] = useState<string | null>(null);
 
@@ -34,60 +35,73 @@ export default function ChatSessionPage() {
   }, [messages]);
 
   useEffect(() => {
+    checkUserRole();
     fetchDeckInfo();
   }, [chatId]);
+
+  const checkUserRole = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .single();
+
+      if (error) {
+        console.error("Error fetching profile:", error);
+        toast.error("Failed to fetch profile");
+      } else if (data.role === 'free') {
+        toast.error("Chat feature is currently available only for premium users.");
+        router.push('/dashboard');
+      }
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (input.trim() === '') return;
-  
+
     const newMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => {
-      const updatedMessages = [...prev, newMessage];
-      updateChatSession(updatedMessages);
-      return updatedMessages;
-    });
+    setMessages((prev) => [...prev, newMessage]);
     setInput('');
     setIsLoading(true);
-  
+
     try {
-      const response = await fetch('/api/assistant', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
           messages: [...messages, newMessage],
           flashcards: JSON.parse(flashcards || '[]'),
-          chatId
         }),
       });
-  
+
       if (!response.ok) throw new Error(response.statusText);
-  
-      const data = response.body;
-      if (!data) return;
-  
-      const reader = data.getReader();
+
+      const reader = response.body?.getReader();
       const decoder = new TextDecoder();
-      let done = false;
-      let accumulatedResponse = '';
-  
-      while (!done) {
-        const { value, done: doneReading } = await reader.read();
-        done = doneReading;
-        const chunkValue = decoder.decode(value);
-        accumulatedResponse += chunkValue;
-        setMessages((prev) => [
-          ...prev,
-          { role: 'assistant', content: accumulatedResponse },
-        ]);        
+
+      if (reader) {
+        let accumulatedResponse = '';
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value);
+          accumulatedResponse += chunk;
+          setMessages((prev) => [
+            ...prev,
+            { role: 'assistant', content: accumulatedResponse },
+          ]);
+        }
+
+        setTokenCount((prev) => prev + input.split(' ').length + accumulatedResponse.split(' ').length);
+
+        if (tokenCount > 7500) {
+          toast.warning('You are approaching the token limit. Please start a new chat soon.');
+        }
       }
-  
-      setTokenCount((prev) => prev + input.split(' ').length + accumulatedResponse.split(' ').length);
-  
-      if (tokenCount > 7500) {
-        toast.warning('You are approaching the token limit. Please start a new chat soon.');
-      }
-  
+
     } catch (error) {
       console.error('Error:', error);
       toast.error('Failed to send message');

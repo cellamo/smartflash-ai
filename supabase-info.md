@@ -71,3 +71,14 @@ This schema contains the main application data.
 	•	deck_id: References decks.id.
 	•	start_time, end_time: Timestamps.
 	•	cards_reviewed, correct_reviews: 
+
+7.	chat_sessions
+	•	Logs: Details of chat sessions.
+	•	Columns:
+	•	id: Primary key.
+	•	user_id: References auth.users.id.
+	•	deck_id: References decks.id.
+	•	created_at: Timestamp when the chat session was created.
+	•	last_message: Text of the last message in the chat session.
+	•	last_updated: Timestamp when the chat session was last updated.
+	•	messages: JSONB column containing the messages in the chat session.
