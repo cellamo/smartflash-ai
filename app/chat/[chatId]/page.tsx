@@ -57,59 +57,66 @@ export default function ChatSessionPage() {
       }
     }
   };
+const handleSubmit = async (e: React.FormEvent) => {
+  e.preventDefault();
+  if (input.trim() === '') return;
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (input.trim() === '') return;
+  const newMessage: Message = { role: 'user', content: input };
+  setMessages((prev) => [...prev, newMessage]);
+  setInput('');
+  setIsLoading(true);
 
-    const newMessage: Message = { role: 'user', content: input };
-    setMessages((prev) => [...prev, newMessage]);
-    setInput('');
-    setIsLoading(true);
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        messages: [...messages, newMessage],
+        flashcards: JSON.parse(flashcards || '[]'),
+      }),
+    });
 
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          messages: [...messages, newMessage],
-          flashcards: JSON.parse(flashcards || '[]'),
-        }),
-      });
+    if (!response.ok) throw new Error(response.statusText);
 
-      if (!response.ok) throw new Error(response.statusText);
+    const reader = response.body?.getReader();
+    const decoder = new TextDecoder();
 
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
+    if (reader) {
+      let accumulatedResponse = '';
+      setMessages((prev) => [...prev, { role: 'assistant', content: '' }]);
 
-      if (reader) {
-        let accumulatedResponse = '';
-        while (true) {
-          const { done, value } = await reader.read();
-          if (done) break;
-          const chunk = decoder.decode(value);
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        
+        if (chunk.includes('[TOKEN_COUNT:')) {
+          const tokenCount = parseInt(chunk.match(/\[TOKEN_COUNT:(\d+)\]/)?.[1] || '0');
+          setTokenCount(tokenCount);
+          break;
+        } else {
           accumulatedResponse += chunk;
-          setMessages((prev) => [
-            ...prev,
-            { role: 'assistant', content: accumulatedResponse },
-          ]);
-        }
-
-        setTokenCount((prev) => prev + input.split(' ').length + accumulatedResponse.split(' ').length);
-
-        if (tokenCount > 7500) {
-          toast.warning('You are approaching the token limit. Please start a new chat soon.');
+          setMessages((prev) => {
+            const updatedMessages = [...prev];
+            updatedMessages[updatedMessages.length - 1].content = accumulatedResponse;
+            updateChatSession(updatedMessages);
+            return updatedMessages;
+          });
         }
       }
 
-    } catch (error) {
-      console.error('Error:', error);
-      toast.error('Failed to send message');
-    } finally {
-      setIsLoading(false);
+      if (tokenCount > 7500) {
+        toast.warning('You are approaching the token limit. Please start a new chat soon.');
+      }
     }
-  };
 
+  } catch (error) {
+    console.error('Error:', error);
+    toast.error('Failed to send message');
+  } finally {
+    setIsLoading(false);
+  }
+};
   const fetchDeckInfo = async () => {
     try {
       const { data: chatSession, error: chatError } = await supabase
@@ -117,27 +124,25 @@ export default function ChatSessionPage() {
         .select('deck_id, messages')
         .eq('id', chatId)
         .single();
-  
+
       if (chatError) throw chatError;
-  
+
       const { data: deck, error: deckError } = await supabase
         .from('decks')
         .select('name, flashcards(front, back, notes)')
         .eq('id', chatSession.deck_id)
         .single();
-  
+
       if (deckError) throw deckError;
 
+      setDeckName(deck.name);
       if (chatSession.messages) {
         setMessages(JSON.parse(chatSession.messages));
-      }      
-  
-      setDeckName(deck.name);
-      setMessages(chatSession.messages || []);
+      }
 
       const optimizedFlashcards = deck.flashcards.map(({ front, back }) => [front, back]);
       setFlashcards(JSON.stringify(optimizedFlashcards));
-  
+
     } catch (error) {
       console.error("Error fetching deck info:", error);
       toast.error("Failed to load deck information");
@@ -149,12 +154,12 @@ export default function ChatSessionPage() {
       .from('chat_sessions')
       .update({ messages: JSON.stringify(messages) })
       .eq('id', chatId);
-  
+
     if (error) {
       console.error('Error updating chat session:', error);
       toast.error('Failed to save chat history');
     }
-  };  
+  };
   
 
   return (
@@ -200,6 +205,9 @@ export default function ChatSessionPage() {
               <div ref={messagesEndRef} />
             </CardContent>
             <CardContent className="p-4 border-t">
+              <div className="text-sm text-gray-500 mb-2">
+                Token count: {tokenCount}
+              </div>
               <form onSubmit={handleSubmit} className="flex gap-2">
                 <Input
                   type="text"
