@@ -64,13 +64,15 @@ This schema contains the main application data.
 
 6. study_sessions
 
-	•	Logs details of each study session.
-	•	Columns:
-	•	id: Primary key.
-	•	user_id: References auth.users.id.
-	•	deck_id: References decks.id.
-	•	start_time, end_time: Timestamps.
-	•	cards_reviewed, correct_reviews: 
+	• Logs details of each study session.
+	• Columns:
+	• id: Primary key.
+	• user_id: References auth.users.id.
+	• deck_id: References decks.id.
+	• start_time, end_time: Timestamps.
+	• cards_reviewed, correct_reviews: Metrics of the study session.
+	• card_count: Number of cards selected for the session.
+	• is_scrambled: Boolean indicating if the cards were scrambled.
 
 7.	chat_sessions
 	•	Logs: Details of chat sessions.

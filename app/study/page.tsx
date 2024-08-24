@@ -6,12 +6,15 @@ import Link from 'next/link';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Plus, Settings, Play, Edit, BookOpen } from "lucide-react";
+import { Plus, Play, Edit, BookOpen } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 
 interface Deck {
   id: string;
@@ -25,6 +28,10 @@ function StudyDecks() {
   const [newDeckName, setNewDeckName] = useState("");
   const [loading, setLoading] = useState(true);
   const supabase = createClientComponentClient();
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
+  const [cardCount, setCardCount] = useState(10);
+  const [isScrambled, setIsScrambled] = useState(false);
 
   useEffect(() => {
     fetchDecks();
@@ -69,6 +76,11 @@ function StudyDecks() {
     }
   };
 
+  const handleStudyClick = (deckId: string) => {
+    setSelectedDeckId(deckId);
+    setIsDialogOpen(true);
+  };
+
   if (loading) {
     return <div>Loading decks...</div>;
   }
@@ -96,6 +108,14 @@ function StudyDecks() {
     );
   }
 
+  const startStudySession = () => {
+    if (selectedDeckId) {
+      // Here you would typically start the study session with the selected options
+      // For now, we'll just navigate to the study page with query parameters
+      window.location.href = `/study/${selectedDeckId}?count=${cardCount}&scrambled=${isScrambled}`;
+    }
+  };
+
   return (
     <>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -109,19 +129,12 @@ function StudyDecks() {
                 {deck.card_count} cards • Last studied: {deck.last_studied || 'Never'}
               </p>
               <div className="flex flex-wrap gap-2">
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/study/${deck.id}`}>
-                    <Play className="mr-2 h-4 w-4" /> Study
-                  </Link>
+              <Button variant="outline" size="sm" onClick={() => handleStudyClick(deck.id)}>
+                  <Play className="mr-2 h-4 w-4" /> Study
                 </Button>
                 <Button variant="outline" size="sm" asChild>
                   <Link href={`/edit-deck/${deck.id}`}>
                     <Edit className="mr-2 h-4 w-4" /> Edit
-                  </Link>
-                </Button>
-                <Button variant="outline" size="sm" asChild>
-                  <Link href={`/deck-settings/${deck.id}`}>
-                    <Settings className="mr-2 h-4 w-4" /> Settings
                   </Link>
                 </Button>
               </div>
@@ -141,6 +154,41 @@ function StudyDecks() {
           <Plus className="mr-2 h-4 w-4" /> Create New Deck
         </Button>
       </div>
+      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Study Session Settings</DialogTitle>
+            <DialogDescription>
+              Configure your study session for this deck.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label htmlFor="cardCount" className="text-right">
+                Number of cards
+              </Label>
+              <Input
+                id="cardCount"
+                type="number"
+                value={cardCount}
+                onChange={(e) => setCardCount(Number(e.target.value))}
+                className="col-span-3"
+              />
+            </div>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="scramble-mode"
+                checked={isScrambled}
+                onCheckedChange={setIsScrambled}
+              />
+              <Label htmlFor="scramble-mode">Scramble cards</Label>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={startStudySession}>Start Study Session</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
