@@ -1,12 +1,11 @@
 "use client";
-
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, ArrowLeft, Edit, Check } from "lucide-react";
+import { Plus, ArrowLeft, Edit, Check, Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
@@ -15,17 +14,21 @@ import { useRouter } from 'next/navigation';
 export default function EditDeckPage({ params }: { params: { id: string } }) {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
-  const [flashcards, setFlashcards] = useState<any[]>([]);
+  const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
   const [deckName, setDeckName] = useState("");
   const [isEditingName, setIsEditingName] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
+  const [notes, setNotes] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const cardsPerPage = 5;
   const supabase = createClientComponentClient();
   const router = useRouter();
 
   useEffect(() => {
     fetchDeckDetails();
     fetchFlashcards();
-  }, []);
+  }, [params.id]);
 
   const fetchDeckDetails = async () => {
     const { data, error } = await supabase
@@ -61,7 +64,18 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
     if (front.trim() && back.trim()) {
       const { data, error } = await supabase
         .from('flashcards')
-        .insert({ front: front.trim(), back: back.trim(), deck_id: params.id })
+        .insert({ 
+          front: front.trim(), 
+          back: back.trim(), 
+          notes: notes.trim(),
+          deck_id: params.id,
+          created_at: new Date().toISOString(),
+          last_reviewed: null,
+          review_count: 0,
+          ease_factor: 2.5,
+          interval: 0,
+          due_date: new Date().toISOString()
+        })
         .select()
         .single();
 
@@ -72,6 +86,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
         setFlashcards([...flashcards, data]);
         setFront("");
         setBack("");
+        setNotes("");
         toast.success('Flashcard added successfully');
       }
     } else {
@@ -99,6 +114,18 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
       setNewDeckName(deckName);
     }
   };
+
+  const filteredFlashcards = flashcards.filter(card =>
+    card.front.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    card.back.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    card.notes?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const indexOfLastCard = currentPage * cardsPerPage;
+  const indexOfFirstCard = indexOfLastCard - cardsPerPage;
+  const currentCards = filteredFlashcards.slice(indexOfFirstCard, indexOfLastCard);
+
+  const totalPages = Math.ceil(filteredFlashcards.length / cardsPerPage);
 
   return (
     <div className="flex flex-col h-screen bg-slate-200 pb-16">
@@ -146,6 +173,11 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                   value={back}
                   onChange={(e) => setBack(e.target.value)}
                 />
+                <Textarea
+                  placeholder="Additional notes (optional)"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                />
                 <Button onClick={addFlashcard} className="w-full">
                   <Plus className="mr-2 h-4 w-4" /> Add Flashcard
                 </Button>
@@ -158,18 +190,52 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
               <CardTitle className="text-xl">Flashcards in this Deck</CardTitle>
             </CardHeader>
             <CardContent>
-              {flashcards.length > 0 ? (
+              <div className="mb-4 relative">
+                <Input
+                  type="text"
+                  placeholder="Search flashcards..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full pl-10"
+                />
+                <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              </div>
+              {currentCards.length > 0 ? (
                 <ul className="space-y-2">
-                  {flashcards.map((card) => (
+                  {currentCards.map((card) => (
                     <li key={card.id} className="border-b pb-2">
                       <p className="font-medium">Front: {card.front}</p>
                       <p className="text-sm text-muted-foreground">Back: {card.back}</p>
+                      {card.notes && (
+                        <p className="text-xs text-muted-foreground mt-1">Notes: {card.notes}</p>
+                      )}
                     </li>
                   ))}
                 </ul>
               ) : (
-                <p className="text-center text-muted-foreground">No flashcards in this deck yet</p>
+                <p className="text-center text-muted-foreground">No flashcards found</p>
               )}
+              <div className="flex justify-between items-center mt-4">
+                <Button
+                  onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                  disabled={currentPage === 1}
+                  variant="outline"
+                  size="sm"
+                >
+                  <ChevronLeft className="h-4 w-4 mr-2" /> Previous
+                </Button>
+                <span className="text-sm text-muted-foreground">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                  disabled={currentPage === totalPages}
+                  variant="outline"
+                  size="sm"
+                >
+                  Next <ChevronRight className="h-4 w-4 ml-2" />
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </div>
@@ -177,4 +243,18 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
       <Toaster />
     </div>
   );
+}
+
+interface Flashcard {
+  id: string;
+  front: string;
+  back: string;
+  deck_id: string;
+  notes: string;
+  created_at: string;
+  last_reviewed: string | null;
+  review_count: number;
+  ease_factor: number;
+  interval: number;
+  due_date: string;
 }
