@@ -144,7 +144,7 @@ export default function CreateAIDeckPage() {
                 className="mb-4"
                 rows={10}
               />
-              <Button onClick={createAIDeckMock} className="w-full" disabled={isLoading}>
+              <Button onClick={createAIDeck} className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
