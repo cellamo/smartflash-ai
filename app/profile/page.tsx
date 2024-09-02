@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { useRouter } from 'next/navigation';
 import { useSearchParams } from 'next/navigation';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,7 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
-import { User, BookOpen, Award, Clock } from "lucide-react";
+import { User, BookOpen, Award, Clock, Zap } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Badge } from "@/components/ui/badge";
 
@@ -145,7 +145,7 @@ export default function ProfilePage() {
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="full_name">Full Name</Label>
+                <Label htmlFor="full_name" className="font-semibold text-lg text-primary">Full Name</Label>
                 {isEditing ? (
                   <Input
                     id="full_name"
@@ -154,26 +154,33 @@ export default function ProfilePage() {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{profile.full_name}</p>
+                  <p className="text-gray-500">{profile.full_name}</p>
                 )}
               </div>
               
               <div>
-                <Label htmlFor="email">Email</Label>
-                <p>{profile.email}</p>
+                <Label htmlFor="email" className="font-semibold text-lg text-primary">Email</Label>
+                <p className="text-gray-500">{profile.email}</p>
               </div>
               
               <div>
-                <Label htmlFor="role">Account Type</Label>
+                <Label htmlFor="role" className="font-semibold text-lg text-primary">Account Type</Label>
                 <div className="flex items-center space-x-2">
                   <Badge variant={profile.role === 'premium' ? 'default' : 'secondary'}>
                     {profile.role === 'premium' ? 'Premium' : 'Free'}
                   </Badge>
                 </div>
+                {profile && profile.role === "premium" && (
+                <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
+                  <Zap className="h-4 w-4 mr-2 text-green-600" />
+                  Premium features unlocked: Unlimited chats, priority support,
+                  and advanced AI models!
+                </CardDescription>
+              )}
               </div>
               
               <div>
-                <Label htmlFor="bio">Bio</Label>
+                <Label htmlFor="bio" className="font-semibold text-lg text-primary">Bio</Label>
                 {isEditing ? (
                   <Textarea
                     id="bio"
@@ -182,7 +189,7 @@ export default function ProfilePage() {
                     onChange={handleChange}
                   />
                 ) : (
-                  <p>{profile.bio}</p>
+                  <p className="text-gray-500">{profile.bio}</p>
                 )}
               </div>
               

@@ -154,6 +154,27 @@ export default function ChatPage() {
       return;
     }
   
+    toast.custom((t: any) => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Confirm Deletion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Are you sure you want to delete this chat?</p>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={() => toast.dismiss(t)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => confirmDelete(chatId, t)}>
+              Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ), { duration: 5000 });
+  };
+
+  const confirmDelete = async (chatId: string, toastId: string) => {
     const { error } = await supabase
       .from('chat_sessions')
       .delete()
@@ -166,6 +187,7 @@ export default function ChatPage() {
       setChatSessions(chatSessions.filter(session => session.id !== chatId));
       toast.success("Chat session deleted successfully!");
     }
+    toast.dismiss(toastId);
   };
 
   const indexOfLastSession = currentPage * sessionsPerPage;
@@ -230,13 +252,6 @@ export default function ChatPage() {
                   chats!
                 </CardDescription>
               )}
-              {profile && profile.role === "premium" && (
-                <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
-                  <Zap className="h-4 w-4 mr-2" />
-                  Premium features unlocked: Unlimited chats, priority support,
-                  and advanced AI models!
-                </CardDescription>
-              )}
               <div className="flex gap-2 mb-4">
   <Select onValueChange={setSelectedDeck} value={selectedDeck}>
     <SelectTrigger className="flex-grow">
@@ -262,11 +277,7 @@ export default function ChatPage() {
 </div>
             </CardContent>
           </Card>
-
           <Card className="flex-grow overflow-scroll">
-            <CardHeader>
-              <CardTitle className="text-lg">Your Chat Sessions</CardTitle>
-            </CardHeader>
             <CardContent className="overflow-y-auto ">
             {currentSessions
   .filter(session => {

@@ -5,12 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, ArrowLeft, Edit, Check, Search, ChevronLeft, ChevronRight } from "lucide-react";
+import { Plus, ArrowLeft, Edit, Check, Search, ChevronLeft, ChevronRight, Trash2 } from "lucide-react";
 import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
-import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import Link from 'next/link';
 
 export default function EditDeckPage({ params }: { params: { id: string } }) {
@@ -26,8 +25,6 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   const cardsPerPage = 5;
   const supabase = createClientComponentClient();
   const router = useRouter();
-
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchDeckDetails();
@@ -120,11 +117,31 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   };
 
   const deleteDeck = async () => {
+    toast.custom((t) => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Confirm Deletion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Are you sure you want to delete this deck? This action cannot be undone.</p>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={() => toast.dismiss(t)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => confirmDelete(t)}>
+              Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ), { duration: 5000 });
+  };
+
+  const confirmDelete = async (t: any) => {
     const { error } = await supabase
       .from('decks')
       .delete()
       .eq('id', params.id);
-
     if (error) {
       console.error('Error deleting deck:', error);
       toast.error('Failed to delete deck');
@@ -132,7 +149,46 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
       toast.success('Deck deleted successfully');
       router.push('/'); // Redirect to home or another appropriate page
     }
+    toast.dismiss(t);
   };
+
+  const deleteFlashcard = (flashcardId: string) => {
+    toast.custom((t) => (
+      <Card>
+        <CardHeader>
+          <CardTitle>Confirm Deletion</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p>Are you sure you want to delete this flashcard?</p>
+          <div className="flex justify-end space-x-2 mt-4">
+            <Button variant="outline" onClick={() => toast.dismiss(t)}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={() => confirmDeleteFlashcard(flashcardId, t)}>
+              Delete
+            </Button>
+          </div>
+        </CardContent>
+      </Card>
+    ), { duration: 5000 });
+  };
+  
+  const confirmDeleteFlashcard = async (flashcardId: string, t: any) => {
+    const { error } = await supabase
+      .from('flashcards')
+      .delete()
+      .eq('id', flashcardId);
+  
+    if (error) {
+      console.error('Error deleting flashcard:', error);
+      toast.error('Failed to delete flashcard');
+    } else {
+      setFlashcards(flashcards.filter(card => card.id !== flashcardId));
+      toast.success('Flashcard deleted successfully');
+    }
+    toast.dismiss(t);
+  };
+  
 
   const filteredFlashcards = flashcards.filter(card =>
     card.front.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -231,17 +287,21 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                             <p className="text-xs text-muted-foreground mt-1">Notes: {card.notes}</p>
                           )}
                         </div>
-                        <Link href={`/edit-flashcard/${card.id}`}>
-                          <Button variant="outline" size="sm">
-                            <Edit className="h-4 w-4 " />
+                        <div className="flex space-x-2">
+                          <Button variant="outline" size="sm" onClick={() => deleteFlashcard(card.id)}>
+                            <Trash2 className="h-4 w-4" />
                           </Button>
-                        </Link>
+                          <Link href={`/edit-flashcard/${card.id}`}>
+                            <Button variant="outline" size="sm">
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          </Link>
+                        </div>
                       </div>
                     </li>
                   ))}
                 </ul>
-              ) : (
-                <p className="text-center text-muted-foreground">No flashcards found</p>
+              ) : (                <p className="text-center text-muted-foreground">No flashcards found</p>
               )}
               <div className="flex justify-between items-center mt-4">
                 <Button
@@ -268,31 +328,13 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
           </Card>
         </div>
         <div className="px-2 py-4">
-          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-            <DialogTrigger asChild>
-              <Button 
-                onClick={() => setIsDeleteDialogOpen(true)} 
-                className="w-full" 
-                variant="destructive"
-              >
-                Delete Deck
-              </Button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Confirm Delete</DialogTitle>
-              </DialogHeader>
-              <p>Are you sure you want to delete this deck? This action cannot be undone.</p>
-              <DialogFooter>
-                <Button onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
-                  Cancel
-                </Button>
-                <Button onClick={deleteDeck} variant="destructive">
-                  Delete
-                </Button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          <Button 
+            onClick={deleteDeck}
+            className="w-full"
+            variant="destructive"
+          >
+            Delete Deck
+          </Button>
         </div>
       </div>
       
