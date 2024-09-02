@@ -42,9 +42,13 @@ export default function CreateAIDeckPage() {
       } else {
         throw new Error("No flashcards generated");
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("Error:", error);
-      toast.error(`Failed to create AI Deck: ${error.message}`);
+      if (error instanceof Error) {
+        toast.error(`Failed to create AI Deck: ${error.message}`);
+      } else {
+        toast.error("Failed to create AI Deck: An unknown error occurred");
+      }
     } finally {
       setIsLoading(false);
     }
