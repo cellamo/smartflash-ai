@@ -15,6 +15,7 @@ interface Flashcard {
   id: string;
   front: string;
   back: string;
+  notes: string;
 }
 
 export default function StudyPage({ params }: { params: { id: string } }) {
@@ -35,6 +36,11 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   useEffect(() => {
     fetchFlashcards();
   }, []);
+
+
+const hideAnswer = () => {
+  setShowAnswer(false);
+};
 
   const fetchFlashcards = async () => {
     setLoading(true);
@@ -150,8 +156,23 @@ export default function StudyPage({ params }: { params: { id: string } }) {
         className="mb-4"
       />
       <Card className="mb-4">
-        <CardContent className="text-center text-2xl p-8">
-          {showAnswer ? currentCard.back : currentCard.front}
+        <CardContent className="text-center p-8">
+          {showAnswer ? (
+            <div>
+              <div>
+                <p className="text-2xl">{currentCard.back}</p>
+                {currentCard.notes && (
+                  <p className="text-sm text-gray-600 mt-4 italic">{currentCard.notes}</p>
+                )}
+              </div>
+              <Button onClick={hideAnswer} variant="outline" className="mt-4">
+                <Eye className="mr-2 h-4 w-4" />
+                Hide Answer
+              </Button>
+            </div>
+          ) : (
+            <p className="text-2xl">{currentCard.front}</p>
+          )}
         </CardContent>
       </Card>
       <div className="flex flex-col items-center mb-4">
@@ -161,16 +182,18 @@ export default function StudyPage({ params }: { params: { id: string } }) {
             Show Answer
           </Button>
         ) : (
-          <div className="flex justify-between w-full">
-            <Button onClick={() => handleDifficulty("Easy")} variant="outline">
-              Easy
-            </Button>
-            <Button onClick={() => handleDifficulty("Good")} variant="outline">
-              Good
-            </Button>
-            <Button onClick={() => handleDifficulty("Hard")} variant="outline">
-              Hard
-            </Button>
+          <div className="w-full">
+            <div className="flex justify-between mb-4">
+              <Button onClick={() => handleDifficulty("Easy")} variant="outline">
+                Easy
+              </Button>
+              <Button onClick={() => handleDifficulty("Good")} variant="outline">
+                Good
+              </Button>
+              <Button onClick={() => handleDifficulty("Hard")} variant="outline">
+                Hard
+              </Button>
+            </div>
             <div className="flex justify-end">
               <Button onClick={toggleFlag} variant="outline">
                 <Flag className="mr-2" />
@@ -180,7 +203,7 @@ export default function StudyPage({ params }: { params: { id: string } }) {
           </div>
         )}
       </div>
-      <div className="mt-8">
+      <div className="mt-8 mb-12">
         <h2 className="text-xl font-bold mb-2">Marked Items</h2>
         <ul>
           {flaggedItems.map((id) => (
