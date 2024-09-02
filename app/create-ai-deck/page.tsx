@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Wand2, Loader2, Check, X } from "lucide-react";
+import { Wand2, Loader2, Check, X, Lock } from "lucide-react";
 import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -27,9 +27,40 @@ export default function CreateAIDeckPage() {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [generatedDeck, setGeneratedDeck] = useState<Deck | null>(null);
+  const [userRole, setUserRole] = useState<string>("free");
   const supabase = createClientComponentClient();
 
+  useEffect(() => {
+    fetchUserRole();
+  }, []);
+
+  const fetchUserRole = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (user) {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single();
+
+      if (data) {
+        setUserRole(data.role);
+      }
+    }
+  };
+
   const createAIDeck = async () => {
+
+    if (userRole !== "premium") {
+      toast.error("AI Deck generation is a premium feature. Please upgrade your account.");
+      return;
+    }
+
+    if (notes.length < 100) {
+      toast.error("Please enter at least 100 characters to generate an AI Deck.");
+      return;
+    }
+
     setIsLoading(true);
     try {
       const response = await fetch("/api/generate-ai-deck", {
@@ -150,12 +181,21 @@ export default function CreateAIDeckPage() {
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
                   </>
+                ) : userRole !== "premium" ? (
+                  <>
+                    <Lock className="mr-2 h-4 w-4" /> Premium Feature
+                  </>
                 ) : (
                   <>
                     <Wand2 className="mr-2 h-4 w-4" /> Generate AI Deck
                   </>
                 )}
               </Button>
+              {userRole !== "premium" && (
+                <p className="text-sm text-gray-500 mt-2">
+                  Upgrade to premium to unlock AI Deck generation.
+                </p>
+              )}
             </CardContent>
           </Card>
 
