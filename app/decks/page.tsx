@@ -18,7 +18,9 @@ import {
   PlusCircle,
   Download,
   Upload,
+  Wand2,
 } from "lucide-react";
+import { GradientButton } from "@/components/ui/gradient-button";
 import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
@@ -215,6 +217,13 @@ export default function QuickAddFlashcardPage() {
                 </div>
               </CardContent>
             </Card>
+            <GradientButton
+  onClick={() => router.push("/create-ai-deck")}
+  className="w-full mb-6"
+>
+  <Wand2 className="mr-2 h-4 w-4" /> Create AI Deck from Notes
+</GradientButton>
+
 
             <Card className="mb-6">
   <CardHeader>
@@ -254,6 +263,11 @@ export default function QuickAddFlashcardPage() {
                   <label htmlFor="import-words" className="w-full">
                     <Button className="w-full">
                       <Upload className="mr-2 h-4 w-4" /> Import Words from TXT
+                    </Button>
+                  </label>
+                  <label htmlFor="import-file" className="w-full">
+                    <Button className="w-full" onClick={() => router.push("/create-deck-json")}>
+                      <Upload className="mr-2 h-4 w-4" /> Create Deck from JSON
                     </Button>
                   </label>
                   <input

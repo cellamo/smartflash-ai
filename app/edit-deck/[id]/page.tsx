@@ -10,6 +10,8 @@ import { MobileDock } from '@/components/MobileDock';
 import { Toaster } from "@/components/ui/sonner"
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
+import { Dialog, DialogTrigger, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import Link from 'next/link';
 
 export default function EditDeckPage({ params }: { params: { id: string } }) {
   const [front, setFront] = useState("");
@@ -24,6 +26,8 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   const cardsPerPage = 5;
   const supabase = createClientComponentClient();
   const router = useRouter();
+
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     fetchDeckDetails();
@@ -112,6 +116,21 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
     } else {
       setIsEditingName(false);
       setNewDeckName(deckName);
+    }
+  };
+
+  const deleteDeck = async () => {
+    const { error } = await supabase
+      .from('decks')
+      .delete()
+      .eq('id', params.id);
+
+    if (error) {
+      console.error('Error deleting deck:', error);
+      toast.error('Failed to delete deck');
+    } else {
+      toast.success('Deck deleted successfully');
+      router.push('/'); // Redirect to home or another appropriate page
     }
   };
 
@@ -204,11 +223,20 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                 <ul className="space-y-2">
                   {currentCards.map((card) => (
                     <li key={card.id} className="border-b pb-2">
-                      <p className="font-medium">Front: {card.front}</p>
-                      <p className="text-sm text-muted-foreground">Back: {card.back}</p>
-                      {card.notes && (
-                        <p className="text-xs text-muted-foreground mt-1">Notes: {card.notes}</p>
-                      )}
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <p className="font-medium">Front: {card.front}</p>
+                          <p className="text-sm text-muted-foreground">Back: {card.back}</p>
+                          {card.notes && (
+                            <p className="text-xs text-muted-foreground mt-1">Notes: {card.notes}</p>
+                          )}
+                        </div>
+                        <Link href={`/edit-flashcard/${card.id}`}>
+                          <Button variant="outline" size="sm">
+                            <Edit className="h-4 w-4 " />
+                          </Button>
+                        </Link>
+                      </div>
                     </li>
                   ))}
                 </ul>
@@ -239,7 +267,35 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
             </CardContent>
           </Card>
         </div>
+        <div className="px-2 py-4">
+          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button 
+                onClick={() => setIsDeleteDialogOpen(true)} 
+                className="w-full" 
+                variant="destructive"
+              >
+                Delete Deck
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Confirm Delete</DialogTitle>
+              </DialogHeader>
+              <p>Are you sure you want to delete this deck? This action cannot be undone.</p>
+              <DialogFooter>
+                <Button onClick={() => setIsDeleteDialogOpen(false)} variant="outline">
+                  Cancel
+                </Button>
+                <Button onClick={deleteDeck} variant="destructive">
+                  Delete
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
+      
       <Toaster />
     </div>
   );

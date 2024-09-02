@@ -108,10 +108,10 @@ export default function StudyPage({ params }: { params: { id: string } }) {
 
   const handleFinishStudy = async () => {
     try {
-      await updateStats(cardsStudied, studyTime);
+      // await updateStats(cardsStudied, studyTime);
       toast.success("Study session stats updated successfully!");
       // Additional logic for finishing the study session
-      router.push('/study?sessionEnded=true');
+      window.location.href = '/study?sessionEnded=true';
     } catch (error) {
       toast.error("Failed to update study stats");
       console.error(error);
