@@ -16,10 +16,16 @@ interface Flashcard {
   notes: string;
 }
 
+interface Deck {
+  name: string;
+  description: string;
+  flashcards: Flashcard[];
+}
+
 export default function CreateAIDeckPage() {
   const [notes, setNotes] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [generatedDeck, setGeneratedDeck] = useState<Flashcard[]>([]);
+  const [generatedDeck, setGeneratedDeck] = useState<Deck | null>(null);
   const supabase = createClientComponentClient();
 
   const createAIDeck = async () => {
@@ -37,10 +43,10 @@ export default function CreateAIDeckPage() {
       }
 
       const data = await response.json();
-      if (Array.isArray(data.flashcards) && data.flashcards.length > 0) {
-        setGeneratedDeck(data.flashcards);
+      if (data.name && data.description && Array.isArray(data.flashcards)) {
+        setGeneratedDeck(data);
       } else {
-        throw new Error("No flashcards generated");
+        throw new Error("Invalid deck structure generated");
       }
     } catch (error: unknown) {
       console.error("Error:", error);
@@ -55,19 +61,21 @@ export default function CreateAIDeckPage() {
   };
 
   const handleAccept = async () => {
+    if (!generatedDeck) return;
+
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error("User not authenticated");
 
       const { data: deck, error: deckError } = await supabase
         .from("decks")
-        .insert({ user_id: user.id, name: "AI Generated Deck", description: "Generated from notes" })
+        .insert({ user_id: user.id, name: generatedDeck.name, description: generatedDeck.description })
         .select()
         .single();
 
       if (deckError) throw deckError;
 
-      const flashcardsToInsert = generatedDeck.map(card => ({
+      const flashcardsToInsert = generatedDeck.flashcards.map(card => ({
         deck_id: deck.id,
         front: card.front,
         back: card.back,
@@ -81,7 +89,7 @@ export default function CreateAIDeckPage() {
       if (flashcardsError) throw flashcardsError;
 
       toast.success("AI Deck accepted and saved!");
-      setGeneratedDeck([]);
+      setGeneratedDeck(null);
     } catch (error) {
       console.error("Error saving deck:", error);
       toast.error("Failed to save AI Deck");
@@ -89,7 +97,7 @@ export default function CreateAIDeckPage() {
   };
 
   const handleDecline = () => {
-    setGeneratedDeck([]);
+    setGeneratedDeck(null);
     toast.info("AI Deck declined");
   };
 
@@ -126,16 +134,17 @@ export default function CreateAIDeckPage() {
             </CardContent>
           </Card>
 
-          {generatedDeck.length > 0 && (
+          {generatedDeck && (
             <Card className="w-full mb-8">
               <CardHeader>
                 <CardTitle className="text-xl font-bold">
-                  Generated AI Deck
+                  Generated AI Deck: {generatedDeck.name}
                 </CardTitle>
               </CardHeader>
               <CardContent>
+                <p className="mb-4">{generatedDeck.description}</p>
                 <div className="space-y-4 mb-4">
-                  {generatedDeck.map((card, index) => (
+                  {generatedDeck.flashcards.map((card, index) => (
                     <Card key={index} className="p-4 shadow-lg">
                       <div className="space-y-2">
                         <div>

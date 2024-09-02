@@ -7,27 +7,6 @@ const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-interface Flashcard {
-  front: string;
-  back: string;
-  notes: string;
-}
-
-function parseFlashcards(content: string): Flashcard[] {
-  const flashcards: Flashcard[] = [];
-  const flashcardRegex = /### Flashcard \d+\s+\*\*Front:\*\* (.*?)\s+\*\*Back:\*\* (.*?)\s+\*\*Notes:\*\* (.*?)(?=\s+### Flashcard|\s*$)/g;
-
-  let match;
-  while ((match = flashcardRegex.exec(content)) !== null) {
-    flashcards.push({
-      front: match[1].trim(),
-      back: match[2].trim(),
-      notes: match[3].trim()
-    });
-  }
-
-  return flashcards;
-}
 export async function POST(request: Request) {
   const { notes } = await request.json();
   const supabase = createRouteHandlerClient({ cookies });
@@ -42,10 +21,38 @@ export async function POST(request: Request) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are an AI assistant that creates flashcards based on provided notes. Create a set of flashcards with front, back, and notes fields." },
-        { role: "user", content: `Create flashcards from these notes: ${notes}` }
+        { role: "system", content: "You are an AI assistant that creates flashcard decks based on provided notes. Create a deck with a name, description, and at least 10 flashcards. Each flashcard should have a front (question), back (answer), and optional notes." },
+        { role: "user", content: `Create a flashcard deck from these notes: ${notes}` }
       ],
-    });
+      response_format: {
+        type: "json_schema",
+        json_schema: {
+          name: "flashcard_deck",
+          strict: true,
+          schema: {
+            type: "object",
+            properties: {
+              name: { type: "string" },
+              description: { type: "string" },
+              flashcards: {
+                type: "array",
+                items: {
+                  type: "object",
+                  properties: {
+                    front: { type: "string" },
+                    back: { type: "string" },
+                    notes: { type: "string" }
+                  },
+                  required: ["front", "back", "notes"],
+                  additionalProperties: false
+                }
+              }
+            },
+            required: ["name", "description", "flashcards"],
+            additionalProperties: false
+          }
+        }
+      }    });
 
     const content = completion.choices[0].message.content;
 
@@ -53,9 +60,7 @@ export async function POST(request: Request) {
       throw new Error('No content in OpenAI response');
     }
 
-    const flashcards = parseFlashcards(content);
-
-    return NextResponse.json({ flashcards });
+    const deck = JSON.parse(content);    return NextResponse.json(deck);
   } catch (error) {
     console.error('OpenAI API error:', error);
     return NextResponse.json({ error: 'Failed to generate flashcards' }, { status: 500 });
