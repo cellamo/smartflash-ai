@@ -9,6 +9,7 @@ import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 interface Flashcard {
   front: string;
@@ -55,6 +56,30 @@ export default function CreateAIDeckPage() {
       } else {
         toast.error("Failed to create AI Deck: An unknown error occurred");
       }
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const createAIDeckMock = async () => {
+    setIsLoading(true);
+    try {
+      const mockData = {
+        name: "Sample Deck",
+        description: "This is a sample deck generated from AI",
+        flashcards: [
+          { front: "What is the capital of France?", back: "Paris", notes: "This is a sample flashcard" },
+          { front: "What is the capital of Germany?", back: "Berlin", notes: "This is a sample flashcard" },
+          { front: "What is the capital of Italy?", back: "Rome", notes: "This is a sample flashcard" },
+          { front: "What is the capital of Spain?", back: "Madrid", notes: "This is a sample flashcard" },
+          { front: "What is the capital of Portugal?", back: "Lisbon", notes: "This is a sample flashcard" },
+        ]
+      };
+
+      setGeneratedDeck(mockData);
+    } catch (error) {
+      console.error("Error:", error);
+      toast.error("Failed to create AI Deck: An unknown error occurred");
     } finally {
       setIsLoading(false);
     }
@@ -119,7 +144,7 @@ export default function CreateAIDeckPage() {
                 className="mb-4"
                 rows={10}
               />
-              <Button onClick={createAIDeck} className="w-full" disabled={isLoading}>
+              <Button onClick={createAIDeckMock} className="w-full" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -143,27 +168,35 @@ export default function CreateAIDeckPage() {
               </CardHeader>
               <CardContent>
                 <p className="mb-4">{generatedDeck.description}</p>
-                <div className="space-y-4 mb-4">
-                  {generatedDeck.flashcards.map((card, index) => (
-                    <Card key={index} className="p-4 shadow-lg">
-                      <div className="space-y-2">
-                        <div>
-                          <strong className="text-sm text-gray-600">Front:</strong>
-                          <p className="mt-1">{card.front}</p>
-                        </div>
-                        <div>
-                          <strong className="text-sm text-gray-600">Back:</strong>
-                          <p className="mt-1">{card.back}</p>
-                        </div>
-                        <div>
-                          <strong className="text-sm text-gray-600">Notes:</strong>
-                          <p className="mt-1">{card.notes}</p>
-                        </div>
-                      </div>
-                    </Card>
-                  ))}
+                <div className="relative w-full">
+                  <Carousel className="w-full">
+                    <CarouselContent className="px-8">
+                      {generatedDeck.flashcards.map((card, index) => (
+                        <CarouselItem key={index}>
+                          <Card className="p-4 shadow-lg h-full">
+                            <div className="space-y-2">
+                              <div>
+                                <strong className="text-sm text-gray-600">Front:</strong>
+                                <p className="mt-1">{card.front}</p>
+                              </div>
+                              <div>
+                                <strong className="text-sm text-gray-600">Back:</strong>
+                                <p className="mt-1">{card.back}</p>
+                              </div>
+                              <div>
+                                <strong className="text-sm text-gray-600">Notes:</strong>
+                                <p className="mt-1">{card.notes}</p>
+                              </div>
+                            </div>
+                          </Card>
+                        </CarouselItem>
+                      ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-0" />
+                    <CarouselNext className="right-0" />
+                  </Carousel>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between mt-4">
                   <Button onClick={handleAccept} className="w-1/2 mr-2">
                     <Check className="mr-2 h-4 w-4" /> Accept
                   </Button>
