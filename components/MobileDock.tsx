@@ -39,7 +39,7 @@ export function MobileDock() {
   };
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-secondary lg:hidden">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-secondary">
       <div className="flex justify-around items-center h-16 relative">
         {NAV_ITEMS.map((item) => (
           item.dropdown ? (

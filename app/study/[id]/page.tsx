@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useRouter } from "next/navigation";
 import { updateStats } from '@/app/utils/studyUtils';
 import { toast } from "sonner";
+import styles from '@/app/styles/markdown.module.css';
 
 interface Flashcard {
   id: string;
@@ -159,23 +160,24 @@ const hideAnswer = () => {
         <CardContent className="text-center p-8">
           {showAnswer ? (
             <div>
-              <div>
-                <p className="text-2xl">{currentCard.back}</p>
-                {currentCard.notes && (
-                  <p className="text-sm text-gray-600 mt-4 italic">{currentCard.notes}</p>
-                )}
-              </div>
+              <pre className={`text-left whitespace-pre-wrap break-words ${styles.flashcardContent}`}>
+                {currentCard.back}
+              </pre>
+              {currentCard.notes && (
+                <p className="text-sm text-gray-600 mt-4 italic">{currentCard.notes}</p>
+              )}
               <Button onClick={hideAnswer} variant="outline" className="mt-4">
                 <Eye className="mr-2 h-4 w-4" />
                 Hide Answer
               </Button>
             </div>
           ) : (
-            <p className="text-2xl">{currentCard.front}</p>
+            <pre className={`text-left whitespace-pre-wrap break-words ${styles.flashcardContent}`}>
+              {currentCard.front}
+            </pre>
           )}
         </CardContent>
-      </Card>
-      <div className="flex flex-col items-center mb-4">
+      </Card>      <div className="flex flex-col items-center mb-4">
         {!showAnswer ? (
           <Button onClick={toggleAnswer} variant="outline" className="mx-auto">
             <Eye className="mr-2 h-4 w-4" />
