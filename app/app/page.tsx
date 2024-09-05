@@ -63,7 +63,7 @@ export default function App() {
 
   if (!isMobile) {
     return (
-      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-200 dark:bg-slate-800 p-4">
+      <div className="flex min-h-screen w-full flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 p-4">
         <Card className="max-w-md w-full">
           <CardHeader>
             <CardTitle className="text-2xl font-bold text-center">
@@ -81,7 +81,7 @@ export default function App() {
               fully responsive experience soon!
             </p>
             <div className="flex justify-center">
-              <Button asChild>
+              <Button asChild className="dark:bg-gray-700 dark:text-white">
                 <Link href="/">
                   <ArrowLeft className="mr-2 h-4 w-4" />
                   Back to Home Page
@@ -98,7 +98,7 @@ export default function App() {
     return (
       <div className="flex min-h-screen w-full flex-col pb-16">
         <MobileDock />
-        <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 w-full">
+        <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-200 dark:bg-slate-900 md:gap-8 md:p-8 md:pt-4 w-full">
           <Card className="w-full max-w-md mx-auto mt-auto">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
               <Zap className="h-6 w-6 text-primary mr-2" />
@@ -149,7 +149,7 @@ export default function App() {
                     Personalized suggestions to optimize your learning
                   </CardDescription>
                 </div>
-                <Button asChild size="sm" className="ml-2 gap-1">
+                <Button asChild size="sm" className="ml-2 gap-1 dark:bg-gray-700 dark:text-white">
                   <Link href="/study-plan">
                     View Plan
                     <ArrowUpRight className="h-4 w-4" />
@@ -200,7 +200,7 @@ export default function App() {
   return (
     <div className="flex min-h-screen w-full flex-col">
       {!isMobile && <NavBarDock />}
-      <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-800 dark:bg-slate-800 md:gap-8 md:p-8 md:pt-4 w-full">
+      <main className="flex flex-1 flex-col gap-4 p-2 bg-slate-800 dark:bg-slate-900 md:gap-8 md:p-8 md:pt-4 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:hidden gap-2 max-w-4xl mx-auto">
           <DashboardCard
             title="Flashcards Reviewed"
@@ -238,7 +238,7 @@ export default function App() {
                   Personalized suggestions to optimize your learning
                 </CardDescription>
               </div>
-              <Button asChild size="sm" className="ml-2 gap-1">
+              <Button asChild size="sm" className="ml-2 gap-1 dark:bg-gray-700 dark:text-white">
                 <Link href="/study-plan">
                   View Plan
                   <ArrowUpRight className="h-4 w-4" />

@@ -158,7 +158,7 @@ export default function CreateAIDeckPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-200 pb-16">
+    <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
           <Card className="w-full mb-8">
@@ -175,7 +175,7 @@ export default function CreateAIDeckPage() {
                 className="mb-4"
                 rows={10}
               />
-              <Button onClick={createAIDeck} className="w-full" disabled={isLoading}>
+              <Button onClick={createAIDeckMock} className="w-full dark:bg-gray-700 dark:text-white" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -213,34 +213,34 @@ export default function CreateAIDeckPage() {
                     <CarouselContent className="px-8">
                       {generatedDeck.flashcards.map((card, index) => (
                         <CarouselItem key={index}>
-                          <Card className="p-4 shadow-lg h-full">
+                          <Card className="p-4 shadow-lg h-full dark:bg-gray-800 dark:border-gray-700 dark:shadow-gray-600">
                             <div className="space-y-2">
                               <div>
-                                <strong className="text-sm text-gray-600">Front:</strong>
-                                <p className="mt-1">{card.front}</p>
+                                <strong className="text-sm text-gray-600 dark:text-gray-400">Front:</strong>
+                                <p className="mt-1 dark:text-gray-100">{card.front}</p>
                               </div>
                               <div>
-                                <strong className="text-sm text-gray-600">Back:</strong>
-                                <p className="mt-1">{card.back}</p>
+                                <strong className="text-sm text-gray-600 dark:text-gray-400">Back:</strong>
+                                <p className="mt-1 dark:text-gray-100">{card.back}</p>
                               </div>
                               <div>
-                                <strong className="text-sm text-gray-600">Notes:</strong>
-                                <p className="mt-1">{card.notes}</p>
+                                <strong className="text-sm text-gray-600 dark:text-gray-400">Notes:</strong>
+                                <p className="mt-1 dark:text-gray-100">{card.notes}</p>
                               </div>
                             </div>
                           </Card>
                         </CarouselItem>
                       ))}
                     </CarouselContent>
-                    <CarouselPrevious className="left-0" />
-                    <CarouselNext className="right-0" />
+                    <CarouselPrevious className="left-0 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" />
+                    <CarouselNext className="right-0 dark:bg-gray-700 dark:text-gray-200 dark:hover:bg-gray-600" />
                   </Carousel>
                 </div>
                 <div className="flex justify-between mt-4">
-                  <Button onClick={handleAccept} className="w-1/2 mr-2">
+                  <Button onClick={handleAccept} className="w-1/2 mr-2 bg-green-600 dark:bg-green-900 dark:text-white">
                     <Check className="mr-2 h-4 w-4" /> Accept
                   </Button>
-                  <Button onClick={handleDecline} variant="destructive" className="w-1/2 ml-2">
+                  <Button onClick={handleDecline} variant="destructive" className="w-1/2 ml-2 bg-red-600 dark:bg-red-900 dark:text-white">
                     <X className="mr-2 h-4 w-4" /> Decline
                   </Button>
                 </div>

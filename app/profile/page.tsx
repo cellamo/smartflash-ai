@@ -124,7 +124,7 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-200">
+    <div className="flex flex-col min-h-screen bg-slate-200 dark:bg-slate-900">
       <main className="flex-1 overflow-y-auto p-4 pb-16">
         <Card className="max-w-2xl mx-auto mb-16">
           <CardHeader>
@@ -145,22 +145,23 @@ export default function ProfilePage() {
             
             <div className="space-y-4">
               <div>
-                <Label htmlFor="full_name" className="font-semibold text-lg text-primary">Full Name</Label>
+                <Label htmlFor="full_name" className="font-semibold text-lg text-primary ">Full Name</Label>
                 {isEditing ? (
                   <Input
                     id="full_name"
                     name="full_name"
                     value={editedProfile.full_name || ''}
                     onChange={handleChange}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 ) : (
-                  <p className="text-gray-500">{profile.full_name}</p>
+                  <p className="text-gray-500 dark:text-gray-300">{profile.full_name}</p>
                 )}
               </div>
               
               <div>
                 <Label htmlFor="email" className="font-semibold text-lg text-primary">Email</Label>
-                <p className="text-gray-500">{profile.email}</p>
+                <p className="text-gray-500 dark:text-gray-300">{profile.email}</p>
               </div>
               
               <div>
@@ -187,9 +188,10 @@ export default function ProfilePage() {
                     name="bio"
                     value={editedProfile.bio || ''}
                     onChange={handleChange}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 ) : (
-                  <p className="text-gray-500">{profile.bio}</p>
+                  <p className="text-gray-500 dark:text-gray-300">{profile.bio}</p>
                 )}
               </div>
               
@@ -221,11 +223,11 @@ export default function ProfilePage() {
             <div className="mt-6 flex justify-end space-x-2">
               {isEditing ? (
                 <>
-                  <Button onClick={handleSave}>Save</Button>
-                  <Button variant="outline" onClick={handleCancel}>Cancel</Button>
+                  <Button onClick={handleSave} className="dark:bg-gray-700 dark:text-white">Save</Button>
+                  <Button variant="outline" onClick={handleCancel} className="dark:bg-gray-700 dark:text-white">Cancel</Button>
                 </>
               ) : (
-                <Button onClick={handleEdit}>Edit Profile</Button>
+                <Button onClick={handleEdit} className="dark:bg-gray-700 dark:text-white">Edit Profile</Button>
               )}
             </div>
           </CardContent>

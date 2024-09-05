@@ -210,7 +210,7 @@ export default function ChatSessionPage() {
           content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no"
         />
       </Head>
-      <div className="flex flex-col h-screen bg-slate-200">
+      <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900">
         <div className="flex-grow overflow-scroll px-2 py-4">
           <div className="h-full max-w-2xl mx-auto flex flex-col">
             <Card className="mb-4">
@@ -227,7 +227,7 @@ export default function ChatSessionPage() {
               </CardHeader>
               {deckName && (
                 <CardContent className="pt-2">
-                  <div className="flex items-center text-sm text-gray-500">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
                     <BookOpen className="h-4 w-4 mr-2" />
                     Current Deck: {deckName}
                   </div>
@@ -235,21 +235,21 @@ export default function ChatSessionPage() {
               )}
             </Card>
 
-            <Card className="flex-grow flex flex-col overflow-hidden">
+            <Card className="flex-grow flex flex-col overflow-hidden ">
               <CardContent className="flex-grow overflow-y-auto p-4">
                 {messages.map((message, index) => (
                   <div
                     key={index}
                     className={`flex ${
                       message.role === "user" ? "justify-end" : "justify-start"
-                    } mb-4`}
+                    } mb-4 `}
                   >
                     <div
                       className={`max-w-[70%] p-3 rounded-lg ${
                         message.role === "user"
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-200 text-black"
-                      }`}
+                          ? "bg-blue-500 text-white dark:bg-blue-600"
+                          : "bg-gray-200 text-gray-800 dark:bg-gray-700 dark:text-gray-200"
+                      } shadow-md`}
                     >
                       <div className="flex items-center mb-1">
                         {message.role === "user" ? (
@@ -269,7 +269,7 @@ export default function ChatSessionPage() {
                 <div ref={messagesEndRef} />
               </CardContent>
               <CardContent className="p-4 border-t">
-                <div className="text-sm text-gray-500 mb-2">
+                <div className="text-sm text-gray-500 dark:text-gray-400 mb-2">
                   Token count: {tokenCount}
                 </div>
                 <form onSubmit={handleSubmit} className="flex gap-2">
@@ -284,7 +284,7 @@ export default function ChatSessionPage() {
                     onChange={(e) => setInput(e.target.value)}
                     disabled={isLoading || isDisabled}
                   />
-                  <Button type="submit" disabled={isLoading || isDisabled}>
+                  <Button type="submit" disabled={isLoading || isDisabled} className="dark:bg-gray-700 dark:text-white">
                     {isLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
                     ) : (

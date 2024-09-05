@@ -203,7 +203,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   const totalPages = Math.ceil(filteredFlashcards.length / cardsPerPage);
 
   return (
-    <div className="flex flex-col h-screen bg-slate-200 pb-16">
+    <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
           <Button 
@@ -221,7 +221,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                   <Input
                     value={newDeckName}
                     onChange={(e) => setNewDeckName(e.target.value)}
-                    className="mr-2"
+                    className="mr-2 dark:bg-gray-700 dark:text-white"
                   />
                 ) : (
                   <CardTitle className="text-xl font-bold">Edit Deck: {deckName}</CardTitle>
@@ -242,18 +242,21 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                   placeholder="Front (question)"
                   value={front}
                   onChange={(e) => setFront(e.target.value)}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
                 <Textarea
                   placeholder="Back (answer)"
                   value={back}
                   onChange={(e) => setBack(e.target.value)}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
                 <Textarea
                   placeholder="Additional notes (optional)"
                   value={notes}
                   onChange={(e) => setNotes(e.target.value)}
+                  className="dark:bg-gray-700 dark:text-white"
                 />
-                <Button onClick={addFlashcard} className="w-full">
+                <Button onClick={addFlashcard} className="w-full dark:bg-gray-700 dark:text-white">
                   <Plus className="mr-2 h-4 w-4" /> Add Flashcard
                 </Button>
               </div>
@@ -271,7 +274,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                   placeholder="Search flashcards..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10"
+                  className="w-full pl-10 dark:bg-gray-700 dark:text-white"
                 />
                 <Search className="h-4 w-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               </div>

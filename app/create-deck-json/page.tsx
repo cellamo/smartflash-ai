@@ -95,7 +95,7 @@ Notes: [NOTES]`;
   };
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 dark:bg-slate-900">
       <MobileDock />
       <Card className="mb-4">
         <CardHeader className="flex flex-row items-center gap-2">
@@ -103,7 +103,7 @@ Notes: [NOTES]`;
           <CardTitle>Pro Tip</CardTitle>
         </CardHeader>
         <CardContent>
-          <p className="text-sm text-gray-600">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             Copy the example JSON below and paste it into ChatGPT or Claude along with your notes. 
             They can help you create a customized deck based on your input!
           </p>
@@ -119,10 +119,10 @@ Notes: [NOTES]`;
               value={jsonInput}
               onChange={(e) => setJsonInput(e.target.value)}
               placeholder="Paste your JSON here"
-              className="mb-4"
+              className="mb-4 dark:bg-gray-700 dark:text-white"
               rows={10}
             />
-            <Button type="submit">Create Deck</Button>
+            <Button type="submit" className='dark:bg-gray-700 dark:text-white'>Create Deck</Button>
           </form>
           {message && <p className="mt-4">{message}</p>}
         </CardContent>
@@ -130,12 +130,12 @@ Notes: [NOTES]`;
       <Card className="mt-4">
         <CardHeader className="flex justify-between items-center">
           <CardTitle>JSON Structure Example</CardTitle>
-          <Button onClick={handleCopy} variant="outline" size="sm">
+          <Button onClick={handleCopy} variant="outline" size="sm" className='dark:bg-gray-700 dark:text-white'>
             <Copy className="mr-2 h-4 w-4" /> Copy JSON
           </Button>
         </CardHeader>
         <CardContent>
-          <pre className="text-xs sm:text-sm md:text-base overflow-x-auto">
+          <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-gray-700 dark:bg-gray-700 dark:text-white rounded-md p-4">
             {`{
   "name": "JavaScript Basics",
   "description": "A deck covering fundamental JavaScript concepts",
@@ -155,12 +155,13 @@ Notes: [NOTES]`;
           </pre>
         </CardContent>
       </Card>
-      <Card className="mb-16">
+      <Card className="mb-16 mt-4">
         <CardHeader className="flex justify-between items-center">
           <Button
             onClick={() => setIsPromptVisible(!isPromptVisible)}
             variant="outline"
             size="sm"
+            className='dark:bg-gray-700 dark:text-white'
           >
             {isPromptVisible ? 'Hide' : 'Show'} Example Prompt
           </Button>
@@ -168,10 +169,10 @@ Notes: [NOTES]`;
         </CardHeader>
         {isPromptVisible && (
           <CardContent>
-            <Button onClick={handleCopyPrompt} variant="outline" size="sm" className='mb-4'>
+            <Button onClick={handleCopyPrompt} variant="outline" size="sm" className='dark:bg-gray-700 dark:text-white mb-4'>
             <Copy className="mr-2 h-4 w-4" /> Copy Prompt
           </Button>
-            <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap">
+            <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-gray-700 dark:bg-gray-700 dark:text-white rounded-md p-4">
               {`Create a flashcard deck about [TOPIC] or from the [NOTES]. The deck should have a name, description, and at least 10 flashcards. Each flashcard should have a front (question), back (answer), and optional notes. Please format the output as a JSON object following this structure:
 
 {

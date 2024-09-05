@@ -50,7 +50,7 @@ const StudyProgressOverview: React.FC = () => {
       </CardContent>
       <Card className="w-full max-w-md mx-auto">
         <CardHeader className="flex flex-col items-center justify-center pb-2">
-          <Button asChild size="sm">
+          <Button asChild size="sm" className='dark:bg-gray-700 dark:text-white'>
             <Link href="/progress" className="flex items-center">
               <BarChart2 className="h-4 w-4 mr-2" />
               View Progress

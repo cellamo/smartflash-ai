@@ -9,17 +9,17 @@ html {
 /* *=========== Slate theme =========== */
 @layer base {
   :root {
-    --background: 210 20% 98%;
+    --background: 210 40% 96.1%;
     --foreground: 222.2 47.4% 11.2%;
 
-    --card: 210 20% 98%;
+    --card: 210 40% 96.1%;
     --card-foreground: 222.2 47.4% 11.2%;
 
-    --popover: 210 20% 98%;
+    --popover: 210 40% 96.1%;
     --popover-foreground: 222.2 47.4% 11.2%;
 
     --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 20% 98%;
+    --primary-foreground: 210 40% 96.1%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -31,7 +31,7 @@ html {
     --accent-foreground: 222.2 47.4% 11.2%;
 
     --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 96.1%;
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
@@ -40,32 +40,32 @@ html {
   }
 
   .dark {
-    --background: 217.2 32.6% 17.5%;
-    --foreground: 210 20% 98%;
+    --background: 215 28% 17%;
+    --foreground: 210 40% 98%;
 
-    --card: 222.2 47.4% 11.2%;
-    --card-foreground: 210 20% 98%;
+    --card: 215 28% 17%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 222.2 47.4% 11.2%;
-    --popover-foreground: 210 20% 98%;
+    --popover: 215 28% 17%;
+    --popover-foreground: 210 40% 98%;
 
-    --primary: 210 20% 98%;
+    --primary: 210 40% 98%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 20% 98%;
+    --secondary: 215 28% 17%;
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 215 28% 17%;
     --muted-foreground: 215 20.2% 65.1%;
 
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 20% 98%;
+    --accent: 215 28% 17%;
+    --accent-foreground: 210 40% 98%;
 
     --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 20% 98%;
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
+    --border: 215 28% 17%;
+    --input: 215 28% 17%;
     --ring: 212.7 26.8% 83.9%;
   }
   
@@ -84,7 +84,7 @@ html {
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-slate-200 text-foreground dark:bg-slate-800;
   }
 }
 
@@ -98,3 +98,4 @@ html {
 .special-add-button {
   margin-top: -2rem;
 }
+

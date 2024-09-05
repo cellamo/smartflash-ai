@@ -201,7 +201,7 @@ export default function ChatPage() {
 
   if (profile && profile.role === "free") {
     return (
-      <div className="flex flex-col h-screen pb-20 bg-slate-200">
+      <div className="flex flex-col h-screen pb-20 bg-slate-200 dark:bg-slate-900">
         <div className="flex-grow overflow-scroll px-2 py-4 pb-2">
           <div className="h-full max-w-2xl mx-auto flex flex-col">
             <Card className="mb-4">
@@ -212,11 +212,11 @@ export default function ChatPage() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <CardDescription className="text-center mb-4 text-yellow-600">
+                <CardDescription className="text-center mb-4 text-yellow-600 ">
                   You are on the free tier. Upgrade to premium to unlock AI Tutor Chats!
                 </CardDescription>
                 <Link href="/app" className="w-full">
-                  <Button className="w-full">
+                  <Button className="w-full dark:bg-gray-700 dark:text-white">
                     <Zap className="h-4 w-4 mr-2" /> Upgrade to Premium
                   </Button>
                 </Link>
@@ -231,7 +231,7 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen pb-20 bg-slate-200">
+    <div className="flex flex-col h-screen pb-20 bg-slate-200 dark:bg-slate-900">
       <div className="flex-grow overflow-scroll px-2 py-4 pb-2">
         <div className="h-full max-w-2xl mx-auto flex flex-col">
           <Card className="mb-4">
@@ -254,7 +254,7 @@ export default function ChatPage() {
               )}
               <div className="flex gap-2 mb-4">
   <Select onValueChange={setSelectedDeck} value={selectedDeck}>
-    <SelectTrigger className="flex-grow">
+    <SelectTrigger className="flex-grow dark:bg-gray-700 dark:text-white">
       <SelectValue placeholder="Select a deck" />
     </SelectTrigger>
     <SelectContent>
@@ -263,7 +263,7 @@ export default function ChatPage() {
       ))}
     </SelectContent>
   </Select>
-  <Button onClick={handleStartNewChat}>
+  <Button onClick={handleStartNewChat} className="dark:bg-gray-700 dark:text-white">
     <Plus className="h-4 w-4 mr-2" /> New Chat
   </Button>
 </div>
@@ -271,7 +271,7 @@ export default function ChatPage() {
   <input
     type="text"
     placeholder="Filter by deck name"
-    className="w-full p-2 border rounded"
+    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
     onChange={(e) => setFilter(e.target.value)}
   />
 </div>
@@ -286,7 +286,7 @@ export default function ChatPage() {
   })
   .map((session) => (
     <div key={session.id} className="list-none">
-      <Card className="hover:bg-slate-100 transition-colors">
+      <Card className="hover:bg-slate-100 dark:hover:bg-gray-700 transition-colors">
         <CardContent className="p-4">
           <div className="flex justify-between items-center">
             <Link href={`/chat/${session.id}`} className="flex-grow">

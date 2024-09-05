@@ -29,7 +29,7 @@ export default function ProgressPage() {
   const [progressData, setProgressData] = useState<ProgressData>(mockProgressData);
 
   return (
-    <div className="min-h-screen w-full pb-2 px-2 py-6 bg-slate-200 pb-20">
+    <div className="min-h-screen w-full pb-2 px-2 py-6 bg-slate-200 dark:bg-slate-900 pb-20">
       <MobileDock />
       <div className="max-w-4xl mx-auto">
         <Card className="w-full max-w-md mx-auto mb-8">

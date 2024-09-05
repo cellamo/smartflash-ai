@@ -39,9 +39,9 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   }, []);
 
 
-const hideAnswer = () => {
-  setShowAnswer(false);
-};
+  const hideAnswer = () => {
+    setShowAnswer(false);
+  };
 
   const fetchFlashcards = async () => {
     setLoading(true);
@@ -131,22 +131,26 @@ const hideAnswer = () => {
 
   if (flashcards.length === 0) {
     return (
-      <div className="container mx-auto p-4 bg-slate-200 min-h-screen pb-16">
+      <div className="container mx-auto p-4 bg-slate-200 dark:bg-slate-900 min-h-screen pb-16">
         <Card className="mb-4">
           <CardContent className="text-center p-4">
             <h1 className="text-2xl font-bold">No Flashcards Yet</h1>
             <p>This deck doesn&apos;t have any flashcards. Add some to start studying!</p>
-            <Button onClick={() => router.push(`/edit-deck/${params.id}`)} className="mt-4">
+            <Button onClick={() => router.push(`/edit-deck/${params.id}`)} className="mt-4 dark:bg-gray-700 dark:text-white">
               Add Flashcards
+            </Button>
+            <Button onClick={() => router.push('/study')} variant="outline" className="mt-2 dark:bg-gray-700 dark:text-white">
+              Or, go back to your decks
             </Button>
           </CardContent>
         </Card>
+
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 bg-slate-200 min-h-screen pb-16">
+    <div className="container mx-auto p-4 bg-slate-200 dark:bg-slate-900 min-h-screen pb-16">
       <Card className="mb-4">
         <CardContent className="text-center p-4">
           <h1 className="text-2xl font-bold">Studying: {deckName}</h1>
@@ -154,7 +158,7 @@ const hideAnswer = () => {
       </Card>{" "}
       <Progress
         value={(currentCardIndex / flashcards.length) * 100}
-        className="mb-4"
+        className="mb-4 dark:bg-gray-700"
       />
       <Card className="mb-4">
         <CardContent className="text-center p-8">
@@ -164,9 +168,9 @@ const hideAnswer = () => {
                 {currentCard.back}
               </pre>
               {currentCard.notes && (
-                <p className="text-sm text-gray-600 mt-4 italic">{currentCard.notes}</p>
+                <p className="text-sm text-gray-600 dark:text-gray-400 mt-4 italic">{currentCard.notes}</p>
               )}
-              <Button onClick={hideAnswer} variant="outline" className="mt-4">
+              <Button onClick={hideAnswer} variant="outline" className="mt-4 dark:bg-gray-700 dark:text-white">
                 <Eye className="mr-2 h-4 w-4" />
                 Hide Answer
               </Button>
@@ -214,40 +218,41 @@ const hideAnswer = () => {
         </ul>
       </div>
       <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border p-4">
-  <div className="flex justify-between items-center max-w-screen-xl mx-auto">
-    <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
-      {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
-    </Button>
-    <div className="flex items-center">
-      <Timer className="h-6 w-6 mr-2" />
-      {formatTime(time)}
-    </div>
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <X className="h-6 w-6" />
-        </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent className="p-6">
-  <AlertDialogHeader>
-    <AlertDialogTitle>End this study session?</AlertDialogTitle>
-    <AlertDialogDescription>
-      Your progress will be saved, but you&apos;ll exit the current session.
-    </AlertDialogDescription>
-  </AlertDialogHeader>
-  <AlertDialogFooter className="flex justify-between">
-    <AlertDialogCancel>Cancel</AlertDialogCancel>
-    <AlertDialogAction
-      onClick={handleFinishStudy}
-    >
-      End Session
-    </AlertDialogAction>
-  </AlertDialogFooter>
-</AlertDialogContent>
+        <div className="flex justify-between items-center max-w-screen-xl mx-auto">
+          <Button variant="ghost" size="icon" onClick={() => setIsPaused(!isPaused)}>
+            {isPaused ? <Play className="h-6 w-6" /> : <Pause className="h-6 w-6" />}
+          </Button>
+          <div className="flex items-center">
+            <Timer className="h-6 w-6 mr-2" />
+            {formatTime(time)}
+          </div>
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="icon">
+                <X className="h-6 w-6" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent className="p-6">
+              <AlertDialogHeader>
+                <AlertDialogTitle>End this study session?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Your progress will be saved, but you&apos;ll exit the current session.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter className="flex justify-between">
+                <AlertDialogCancel className="dark:bg-gray-700 dark:text-white">Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleFinishStudy}
+                  className="dark:bg-red-900 bg-red-500 text-white"
+                >
+                  End Session
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
 
-    </AlertDialog>
-  </div>
-</div>
+          </AlertDialog>
+        </div>
+      </div>
     </div>
   );
 }

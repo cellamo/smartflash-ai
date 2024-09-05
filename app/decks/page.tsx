@@ -159,7 +159,7 @@ export default function QuickAddFlashcardPage() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-slate-200 pb-16">
+    <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
           <MobileDock />
@@ -181,26 +181,29 @@ export default function QuickAddFlashcardPage() {
 
             <Card className="mb-6">
               <CardContent className="pt-6">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 ">
                   <Input
                     type="text"
                     placeholder="Front (thing to learn or a question)"
                     value={front}
+                    className="dark:bg-gray-700 dark:text-white"
                     onChange={(e) => setFront(e.target.value)}
                   />
                   <Input
                     type="text"
                     placeholder="Back (answer or definition)"
                     value={back}
+                    className="dark:bg-gray-700 dark:text-white"
                     onChange={(e) => setBack(e.target.value)}
                   />
                   <Textarea
                     placeholder="Additional notes (optional)"
                     value={notes}
+                    className="dark:bg-gray-700 dark:text-white"
                     onChange={(e) => setNotes(e.target.value)}
                   />
                   <Select onValueChange={(value) => setSelectedDeckId(value)}>
-                    <SelectTrigger>
+                    <SelectTrigger className="dark:bg-gray-700 dark:text-white">
                       <SelectValue placeholder="Select a deck" />
                     </SelectTrigger>
                     <SelectContent>
@@ -211,7 +214,7 @@ export default function QuickAddFlashcardPage() {
                       ))}
                     </SelectContent>
                   </Select>
-                  <Button onClick={addFlashcard} className="w-full">
+                  <Button onClick={addFlashcard} className="w-full dark:bg-gray-700 dark:text-white">
                     <Plus className="mr-2 h-4 w-4" /> Add Flashcard
                   </Button>
                 </div>
@@ -256,17 +259,17 @@ export default function QuickAddFlashcardPage() {
               <CardContent>
                 <div className="flex flex-col gap-4">
                   <label htmlFor="import-file" className="w-full">
-                    <Button className="w-full">
+                    <Button className="w-full dark:bg-gray-700 dark:text-white">
                       <Upload className="mr-2 h-4 w-4" /> Import Deck from Anki
                     </Button>
                   </label>
                   <label htmlFor="import-words" className="w-full">
-                    <Button className="w-full">
+                    <Button className="w-full dark:bg-gray-700 dark:text-white">
                       <Upload className="mr-2 h-4 w-4" /> Import Words from TXT
                     </Button>
                   </label>
                   <label htmlFor="import-file" className="w-full">
-                    <Button className="w-full" onClick={() => router.push("/create-deck-json")}>
+                    <Button className="w-full dark:bg-gray-700 dark:text-white" onClick={() => router.push("/create-deck-json")}>
                       <Upload className="mr-2 h-4 w-4" /> Create Deck from JSON
                     </Button>
                   </label>
