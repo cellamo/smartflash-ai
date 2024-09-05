@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { Home, BookOpen, Bot, Plus, User, Settings, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MobileThemeToggle } from "@/components/MobileThemeToggle";
+
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -57,6 +59,7 @@ export function MobileDock() {
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
                 </DropdownMenuItem>
+                <MobileThemeToggle />
                 <DropdownMenuItem onSelect={handleLogout}>
                   <LogOut className="mr-2 h-4 w-4" />
                   <span>Log out</span>
@@ -64,8 +67,7 @@ export function MobileDock() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <button
-              key={item.label}
+            <button              key={item.label}
               type="button"
               onClick={() => handleNavigation(item.href)}
               className={`inline-flex flex-col items-center justify-center w-full h-full ${
