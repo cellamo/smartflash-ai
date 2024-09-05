@@ -114,9 +114,9 @@ export default function AuthPage() {
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
-            <TabsList className="grid w-full grid-cols-2">
-              <TabsTrigger value="signin">Sign In</TabsTrigger>
-              <TabsTrigger value="signup">Sign Up</TabsTrigger>
+            <TabsList className="grid w-full grid-cols-2 gap-2">
+              <TabsTrigger value="signin" className="dark:bg-gray-700 dark:text-white">Sign In</TabsTrigger>
+              <TabsTrigger value="signup" className="dark:bg-gray-700 dark:text-white">Sign Up</TabsTrigger>
             </TabsList>
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
@@ -129,6 +129,7 @@ export default function AuthPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -140,6 +141,7 @@ export default function AuthPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                     <button
                       type="button"
@@ -150,7 +152,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" disabled={isLoading}>
+                <Button type="submit" className="w-full dark:bg-gray-700 dark:text-white" disabled={isLoading}>
                   {isLoading ? (
                     <>
                       <span className="mr-2">Signing In</span>
@@ -192,6 +194,7 @@ export default function AuthPage() {
                     required
                     value={name}
                     onChange={(e) => setName(e.target.value)}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -203,6 +206,7 @@ export default function AuthPage() {
                     required
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
+                    className="dark:bg-gray-700 dark:text-white"
                   />
                 </div>
                 <div className="space-y-2">
@@ -214,6 +218,7 @@ export default function AuthPage() {
                       required
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
+                      className="dark:bg-gray-700 dark:text-white"
                     />
                     <button
                       type="button"
@@ -224,7 +229,7 @@ export default function AuthPage() {
                     </button>
                   </div>
                 </div>
-                <Button type="submit" className="w-full">
+                <Button type="submit" className="w-full dark:bg-gray-700 dark:text-white">
                   Sign Up
                 </Button>
               </form>

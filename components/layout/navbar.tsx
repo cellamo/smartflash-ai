@@ -138,7 +138,7 @@ export const Navbar = () => {
                 <Button
                   onClick={handleFeaturesClick}
                   variant="ghost"
-                  className="justify-start text-base"
+                  className="justify-start text-base dark:bg-gray-700 dark:text-white"
                 >
                   Features
                 </Button>
@@ -148,7 +148,7 @@ export const Navbar = () => {
                     onClick={() => setIsOpen(false)}
                     asChild
                     variant="ghost"
-                    className="justify-start text-base"
+                    className="justify-start text-base dark:bg-gray-700 dark:text-white"
                   >
                     <Link href={href}>{label}</Link>
                   </Button>
@@ -157,13 +157,13 @@ export const Navbar = () => {
             </div>
 
             <SheetFooter className="flex-col sm:flex-col justify-start items-start">
-  <Separator className="mb-2" />
-  <ModeToggle />
-  {user ? (
+              <Separator className="mb-2 dark:bg-gray-700" />
+              <ModeToggle />
+              {user ? (
     <Button
       size="sm"
       onClick={handleLaunchApp}
-      className="mt-2 w-full bg-gradient-to-r from-slate-400 to-slate-600 text-white hover:from-slate-500 hover:to-slate-700 flex items-center justify-center"
+      className="mt-2 w-full bg-gradient-to-r from-slate-400 to-slate-600 text-white hover:from-slate-500 hover:to-slate-700 flex items-center justify-center "
     >
       <Rocket className="mr-2 h-4 w-4" />
       Launch App
@@ -172,7 +172,7 @@ export const Navbar = () => {
     <Button 
       variant="outline" 
       size="sm" 
-      className="mt-2 w-full flex items-center justify-center"
+      className="mt-2 w-full flex items-center justify-center dark:bg-gray-700 dark:text-white"
       onClick={handleAuth}
     >
       <LogIn className="mr-2 h-4 w-4" />
@@ -189,7 +189,7 @@ export const Navbar = () => {
         <NavigationMenuList>
           <NavigationMenuItem>
             <NavigationMenuTrigger 
-              className="bg-card text-base"
+              className="bg-card text-base dark:bg-gray-700 dark:text-white"
               onClick={handleFeaturesClick}
             >
               Features
