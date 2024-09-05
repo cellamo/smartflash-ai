@@ -81,7 +81,7 @@ export function MobileDock() {
               {item.special ? (
                 <div className="relative">
                   <div className="absolute inset-0 bg-primary rounded-full animate-pulse"></div>
-                  <div className="relative z-10 bg-white rounded-full p-3 shadow-lg">
+                  <div className="relative z-10 bg-background dark:bg-secondary rounded-full p-3 shadow-lg">
                     <item.icon className="h-7 w-7 text-primary" />
                   </div>
                 </div>
