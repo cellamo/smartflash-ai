@@ -49,23 +49,26 @@ export async function POST(request: Request) {
             const content = chunk.choices[0]?.delta?.content || '';
             fullResponse += content;
             controller.enqueue(content);
-            console.log('OpenAI chunk:', chunk); // Add this line
+            // console.log('OpenAI chunk:', chunk); // Add this line
 
             if (chunk.usage && chunk.usage.total_tokens) {
               tokenCount = chunk.usage.total_tokens;
             }
           }
-          console.log('Full response:', fullResponse);
+          // console.log('Full response:', fullResponse);
           controller.enqueue(`\n[TOKEN_COUNT:${tokenCount}]`);
           controller.close();
           
-          console.log(`Total tokens used: ${tokenCount}`);
+          // console.log(`Total tokens used: ${tokenCount}`);
         },
       });
     } else if (model === 'gemini-1.5-flash' || model === 'gemini-1.5-pro') {
-      const geminiModel = genAI.getGenerativeModel({ model: model === 'gemini-1.5-flash' ? 'gemini-1.5-flash' : 'gemini-1.5-pro' });
+      const geminiModel = genAI.getGenerativeModel({ model: model === 'gemini-1.5-flash' ? 'gemini-1.5-pro-latest' : 'gemini-1.5-pro-latest' });
       
       const prompt = `You are an AI tutor helping students with their flashcards and study sessions. ALWAYS RESPOND IN THE USER'S LANGUAGE. Consider the following flashcards while responding: ${JSON.stringify(flashcards)}
+
+Previous messages:
+${messages.slice(0, -1).map((msg: { role: any; content: any; }) => `${msg.role}: ${msg.content}`).join('\n')}
 
 User's message: ${messages[messages.length - 1].content}`;
 
@@ -73,16 +76,22 @@ User's message: ${messages[messages.length - 1].content}`;
       
       stream = new ReadableStream({
         async start(controller) {
+          let totalTokenCount = 0;
           for await (const chunk of result.stream) {
             const content = chunk.text();
             controller.enqueue(content);
-            console.log('Gemini chunk:', chunk); // Add this line
+            // console.log('Gemini chunk:', chunk);
+            
+            if (chunk.usageMetadata) {
+              totalTokenCount = chunk.usageMetadata.totalTokenCount;
+            }
           }
-          controller.enqueue(`\n[TOKEN_COUNT:${tokenCount}]`);
+          controller.enqueue(`\n[TOKEN_COUNT:${totalTokenCount}]`);
           controller.close();
+          
+          // console.log(`Total tokens used: ${totalTokenCount}`);
         },
-      });
-    } else {
+      });    } else {
       throw new Error('Invalid model specified');
     }
 
