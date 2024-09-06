@@ -120,22 +120,22 @@ export default function ProfilePage() {
   };
 
   if (!profile) {
-    return <div>Loading...</div>;
+    return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-200 dark:bg-slate-900">
+    <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-900">
       <main className="flex-1 overflow-y-auto p-4 pb-16">
-        <Card className="max-w-2xl mx-auto mb-16">
-          <CardHeader>
+        <Card className="max-w-2xl mx-auto mb-16 border-2 dark:border-slate-700">
+          <CardHeader className="border-b dark:border-slate-700">
             <CardTitle className="text-2xl font-bold flex items-center">
               <User className="mr-2" />
               My Profile
             </CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className="p-6">
             <div className="flex flex-col items-center mb-6">
-              <Avatar className="w-24 h-24 mb-4">
+              <Avatar className="w-24 h-24 mb-4 border-2 dark:border-slate-600">
                 <AvatarImage src={profile.avatar_url} alt={profile.full_name} />
                 <AvatarFallback>
                   <User className="w-12 h-12" />
@@ -143,91 +143,41 @@ export default function ProfilePage() {
               </Avatar>
             </div>
             
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="full_name" className="font-semibold text-lg text-primary ">Full Name</Label>
-                {isEditing ? (
-                  <Input
-                    id="full_name"
-                    name="full_name"
-                    value={editedProfile.full_name || ''}
-                    onChange={handleChange}
-                    className="dark:bg-gray-700 dark:text-white"
-                  />
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-300">{profile.full_name}</p>
-                )}
-              </div>
-              
-              <div>
-                <Label htmlFor="email" className="font-semibold text-lg text-primary">Email</Label>
-                <p className="text-gray-500 dark:text-gray-300">{profile.email}</p>
-              </div>
-              
-              <div>
-                <Label htmlFor="role" className="font-semibold text-lg text-primary">Account Type</Label>
-                <div className="flex items-center space-x-2">
-                  <Badge variant={profile.role === 'premium' ? 'default' : 'secondary'}>
-                    {profile.role === 'premium' ? 'Premium' : 'Free'}
-                  </Badge>
-                </div>
-                {profile && profile.role === "premium" && (
+            <div className="space-y-6">
+              {/* Profile Fields */}
+              {renderProfileField("Full Name", "full_name", profile.full_name)}
+              {renderProfileField("Email", "email", profile.email, false)}
+              {renderProfileField("Account Type", "role", 
+                <Badge variant={profile.role === 'premium' ? 'default' : 'secondary'}>
+                  {profile.role === 'premium' ? 'Premium' : 'Free'}
+                </Badge>,
+                false
+              )}
+              {profile.role === "premium" && (
                 <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
                   <Zap className="h-4 w-4 mr-2 text-green-600" />
-                  Premium features unlocked: Unlimited chats, priority support,
-                  and advanced AI models!
+                  Premium features unlocked: Unlimited chats, priority support, and advanced AI models!
                 </CardDescription>
               )}
-              </div>
+              {renderProfileField("Bio", "bio", profile.bio, true, true)}
               
-              <div>
-                <Label htmlFor="bio" className="font-semibold text-lg text-primary">Bio</Label>
-                {isEditing ? (
-                  <Textarea
-                    id="bio"
-                    name="bio"
-                    value={editedProfile.bio || ''}
-                    onChange={handleChange}
-                    className="dark:bg-gray-700 dark:text-white"
-                  />
-                ) : (
-                  <p className="text-gray-500 dark:text-gray-300">{profile.bio}</p>
-                )}
-              </div>
-              
+              {/* Stats Cards */}
               <div className="grid grid-cols-3 gap-4 mt-6">
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center p-4">
-                    <BookOpen className="mb-2" />
-                    <p className="text-lg font-bold">{profile.total_cards_studied}</p>
-                    <p className="text-sm text-muted-foreground">Cards Studied</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center p-4">
-                    <Clock className="mb-2" />
-                    <p className="text-lg font-bold">{profile.total_study_time} hrs</p>
-                    <p className="text-sm text-muted-foreground">Study Time</p>
-                  </CardContent>
-                </Card>
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center p-4">
-                    <Award className="mb-2" />
-                    <p className="text-lg font-bold">{profile.longest_streak} days</p>
-                    <p className="text-sm text-muted-foreground">Longest Streak</p>
-                  </CardContent>
-                </Card>
+                {renderStatCard(<BookOpen />, profile.total_cards_studied, "Cards Studied")}
+                {renderStatCard(<Clock />, `${profile.total_study_time} hrs`, "Study Time")}
+                {renderStatCard(<Award />, `${profile.longest_streak} days`, "Longest Streak")}
               </div>
             </div>
             
+            {/* Edit Buttons */}
             <div className="mt-6 flex justify-end space-x-2">
               {isEditing ? (
                 <>
-                  <Button onClick={handleSave} className="dark:bg-gray-700 dark:text-white">Save</Button>
-                  <Button variant="outline" onClick={handleCancel} className="dark:bg-gray-700 dark:text-white">Cancel</Button>
+                  <Button onClick={handleSave}>Save</Button>
+                  <Button variant="outline" onClick={handleCancel}>Cancel</Button>
                 </>
               ) : (
-                <Button onClick={handleEdit} className="dark:bg-gray-700 dark:text-white">Edit Profile</Button>
+                <Button onClick={handleEdit} className="dark:bg-slate-700 dark:text-white">Edit Profile</Button>
               )}
             </div>
           </CardContent>
@@ -237,4 +187,45 @@ export default function ProfilePage() {
       <Toaster />
     </div>
   );
+
+  function renderProfileField(label: string, name: string, value: any, editable = true, isTextarea = false) {
+    return (
+      <div className="border-b dark:border-slate-700 pb-4">
+        <Label htmlFor={name} className="font-semibold text-lg text-primary">{label}</Label>
+        {isEditing && editable ? (
+          isTextarea ? (
+            <Textarea
+              id={name}
+              name={name}
+              value={editedProfile[name as keyof Profile] || ''}
+              onChange={handleChange}
+              className="mt-2 dark:bg-slate-700 dark:text-white"
+            />
+          ) : (
+            <Input
+              id={name}
+              name={name}
+              value={editedProfile[name as keyof Profile] || ''}
+              onChange={handleChange}
+              className="mt-2 dark:bg-slate-700 dark:text-white"
+            />
+          )
+        ) : (
+          <p className="mt-2 text-gray-700 dark:text-gray-300">{value}</p>
+        )}
+      </div>
+    );
+  }
+
+  function renderStatCard(icon: React.ReactNode, value: string | number, label: string) {
+    return (
+      <Card className="border dark:border-slate-700">
+        <CardContent className="flex flex-col items-center justify-center p-4 text-center h-full">
+          <div className="mb-2">{icon}</div>
+          <p className="text-lg font-bold">{value}</p>
+          <p className="text-sm text-muted-foreground">{label}</p>
+        </CardContent>
+      </Card>
+    );
+  }
 }

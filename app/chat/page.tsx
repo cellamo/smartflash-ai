@@ -287,7 +287,7 @@ export default function ChatPage() {
                   <Plus className="h-4 w-4 mr-2" /> New Chat
                 </Button>
               </div>
-              <div className="mb-4">
+              <div>
                 <input
                   type="text"
                   placeholder="Filter by deck name"
