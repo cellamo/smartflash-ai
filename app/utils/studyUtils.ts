@@ -1,16 +1,16 @@
-export const updateStats = async (cardsStudied: number, studyTime: number) => {
+export async function updateStats(cardsStudied: number, studyTime: number, correctReviews: number, deckId: string) {
   const response = await fetch('/api/update-stats', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify({ cardsStudied, studyTime }),
+    body: JSON.stringify({ cardsStudied, studyTime, correctReviews, deckId }),
   });
 
   if (!response.ok) {
-    console.error('Failed to update stats');
-    throw new Error('Failed to update stats');
+    const errorData = await response.json();
+    throw new Error(errorData.error || 'Failed to update stats');
   }
 
   return response.json();
-};
+}

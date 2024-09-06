@@ -30,6 +30,8 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   const [time, setTime] = useState(0);
   const [loading, setLoading] = useState(true);
   const [deckName, setDeckName] = useState("");
+  const [correctReviews, setCorrectReviews] = useState(0);
+  const [isSessionComplete, setIsSessionComplete] = useState(false);
 
   const router = useRouter();
   const supabase = createClientComponentClient();
@@ -95,9 +97,14 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   };
 
   const handleNextCard = () => {
-    setCurrentCardIndex((prevIndex) => (prevIndex + 1) % flashcards.length);
+    const nextIndex = (currentCardIndex + 1) % flashcards.length;
+    setCurrentCardIndex(nextIndex);
     setShowAnswer(false);
     setCardsStudied((prev) => prev + 1);
+
+    if (nextIndex === 0) {
+      setIsSessionComplete(true);
+    }
   };
 
   const toggleFlag = () => {
@@ -109,18 +116,23 @@ export default function StudyPage({ params }: { params: { id: string } }) {
   };
 
   const handleDifficulty = (difficulty: string) => {
-    console.log(`Card marked as ${difficulty}`);
+    if (difficulty === "Easy" || difficulty === "Good") {
+      setCorrectReviews((prev) => prev + 1);
+    }
     handleNextCard();
   };
 
   const handleFinishStudy = async () => {
     try {
-      // await updateStats(cardsStudied, studyTime);
+      await updateStats(cardsStudied, studyTime, correctReviews, params.id);
       toast.success("Study session stats updated successfully!");
-      // Additional logic for finishing the study session
       window.location.href = '/study?sessionEnded=true';
     } catch (error) {
-      toast.error("Failed to update study stats");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An unknown error occurred");
+      }
       console.error(error);
     }
   };
@@ -145,6 +157,22 @@ export default function StudyPage({ params }: { params: { id: string } }) {
           </CardContent>
         </Card>
 
+      </div>
+    );
+  }
+
+  if (isSessionComplete) {
+    return (
+      <div className="container mx-auto p-4 bg-slate-200 dark:bg-slate-900 min-h-screen pb-16">
+        <Card className="mb-4">
+          <CardContent className="text-center p-4">
+            <h1 className="text-2xl font-bold mb-4">Study Session Complete!</h1>
+            <p className="mb-4">You've reviewed all the cards in this deck.</p>
+            <Button onClick={handleFinishStudy} className="mt-4 dark:bg-gray-700 dark:text-white">
+              End Session
+            </Button>
+          </CardContent>
+        </Card>
       </div>
     );
   }
