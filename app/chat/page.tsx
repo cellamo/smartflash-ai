@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import {
   Card,
@@ -61,11 +61,26 @@ export default function ChatPage() {
   const supabase = createClientComponentClient();
   const [filter, setFilter] = useState<string>("");
   const [selectedModel, setSelectedModel] = useState<string>("gpt4o-mini");
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchProfile();
     fetchDecks();
     fetchChatSessions();
+  }, []);
+
+  useEffect(() => {
+    const handleResize = () => {
+      if (containerRef.current) {
+        const height = window.innerHeight;
+        containerRef.current.style.height = height < 645 ? 'auto' : '100vh';
+        containerRef.current.style.minHeight = height < 645 ? '100vh' : 'auto';
+      }
+    };
+
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
   }, []);
 
   const fetchProfile = async () => {
@@ -235,9 +250,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="flex flex-col h-screen pb-20 bg-slate-200 dark:bg-slate-900">
-      <div className="flex-grow overflow-scroll px-2 py-4 pb-2">
-        <div className="h-full max-w-2xl mx-auto flex flex-col">
+    <div ref={containerRef} className="flex flex-col pb-20 bg-slate-200 dark:bg-slate-900 overflow-auto">
+      <div className="flex-grow px-2 py-4 pb-2">
+        <div className="max-w-2xl mx-auto flex flex-col">
           <Card className="mb-4">
             <CardHeader className="flex flex-row items-center justify-center space-y-0 pb-2">
               <MessageSquare className="h-6 w-6 text-primary mr-2" />

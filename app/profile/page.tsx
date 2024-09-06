@@ -30,10 +30,7 @@ interface Profile {
 
 export default function ProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [isEditing, setIsEditing] = useState(false);
-  const [editedProfile, setEditedProfile] = useState<Partial<Profile>>({});
   const supabase = createClientComponentClient();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   useEffect(() => {
@@ -90,35 +87,6 @@ export default function ProfilePage() {
     }
   };
 
-  const handleEdit = () => {
-    setIsEditing(true);
-    setEditedProfile({ ...profile });
-  };
-
-  const handleSave = async () => {
-    const { data, error } = await supabase
-      .from('profiles')
-      .update(editedProfile)
-      .eq('id', profile?.id);
-
-    if (error) {
-      toast.error('Failed to update profile');
-    } else {
-      setProfile({ ...profile, ...editedProfile } as Profile);
-      setIsEditing(false);
-      toast.success('Profile updated successfully');
-    }
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-    setEditedProfile({});
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    setEditedProfile({ ...editedProfile, [e.target.name]: e.target.value });
-  };
-
   if (!profile) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
   }
@@ -126,7 +94,7 @@ export default function ProfilePage() {
   return (
     <div className="flex flex-col min-h-screen bg-slate-200 dark:bg-slate-900">
       <main className="flex-1 overflow-y-auto p-4 pb-4">
-        <Card className="max-w-2xl mx-auto mb-16 border-2 dark:border-slate-700">
+        <Card className="max-w-2xl mx-auto mb-4 border-2 dark:border-slate-700">
           <CardHeader className="border-b dark:border-slate-700">
             <CardTitle className="text-2xl font-bold flex items-center">
               <User className="mr-2" />
@@ -144,75 +112,48 @@ export default function ProfilePage() {
             </div>
             
             <div className="space-y-6">
-              {/* Profile Fields */}
-              {renderProfileField("Full Name", "full_name", profile.full_name)}
-              {renderProfileField("Email", "email", profile.email, false)}
-              {renderProfileField("Account Type", "role", 
+              {renderProfileField("Full Name", profile.full_name)}
+              {renderProfileField("Email", profile.email)}
+              {renderProfileField("Account Type", 
                 <Badge variant={profile.role === 'premium' ? 'default' : 'secondary'}>
                   {profile.role === 'premium' ? 'Premium' : 'Free'}
-                </Badge>,
-                false
+                </Badge>
               )}
-              {profile.role === "premium" && (
-                <CardDescription className="text-center mb-4 text-green-600 flex items-center justify-center">
-                  <Zap className="h-4 w-4 mr-2 text-green-600" />
-                  Premium features unlocked: Unlimited chats, priority support, and advanced AI models!
-                </CardDescription>
-              )}
-              {renderProfileField("Bio", "bio", profile.bio, true, true)}
+              {renderProfileField("Bio", profile.bio)}
               
-              {/* Stats Cards */}
               <div className="grid grid-cols-3 gap-4 mt-6">
                 {renderStatCard(<BookOpen />, profile.total_cards_studied, "Cards Studied")}
                 {renderStatCard(<Clock />, `${profile.total_study_time} hrs`, "Study Time")}
                 {renderStatCard(<Award />, `${profile.longest_streak} days`, "Longest Streak")}
               </div>
             </div>
-            
-            {/* Edit Buttons */}
-            <div className="mt-6 flex justify-end space-x-2">
-              {isEditing ? (
-                <>
-                  <Button onClick={handleSave}>Save</Button>
-                  <Button variant="outline" onClick={handleCancel}>Cancel</Button>
-                </>
-              ) : (
-                <Button onClick={handleEdit} className="dark:bg-slate-700 dark:text-white">Edit Profile</Button>
-              )}
-            </div>
           </CardContent>
         </Card>
+
+        {profile.role === "premium" && (
+          <Card className="max-w-2xl mx-auto mb-16">
+            <CardHeader className="flex flex-row items-center gap-2">
+              <Zap className="mr-2 text-yellow-500" />
+              <CardTitle>Premium Features</CardTitle>
+            </CardHeader>
+            <CardContent className="p-4 flex items-center">
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                As a Premium user, you have access to unlimited chats, priority support, and advanced AI models!
+              </p>
+            </CardContent>
+          </Card>
+        )}
       </main>
       <MobileDock />
       <Toaster />
     </div>
   );
 
-  function renderProfileField(label: string, name: string, value: any, editable = true, isTextarea = false) {
+  function renderProfileField(label: string, value: any) {
     return (
       <div className="border-b dark:border-slate-700 pb-4">
-        <Label htmlFor={name} className="font-semibold text-lg text-primary">{label}</Label>
-        {isEditing && editable ? (
-          isTextarea ? (
-            <Textarea
-              id={name}
-              name={name}
-              value={editedProfile[name as keyof Profile] || ''}
-              onChange={handleChange}
-              className="mt-2 dark:bg-slate-700 dark:text-white"
-            />
-          ) : (
-            <Input
-              id={name}
-              name={name}
-              value={editedProfile[name as keyof Profile] || ''}
-              onChange={handleChange}
-              className="mt-2 dark:bg-slate-700 dark:text-white"
-            />
-          )
-        ) : (
-          <p className="mt-2 text-gray-700 dark:text-gray-300">{value}</p>
-        )}
+        <p className="font-semibold text-lg text-primary">{label}</p>
+        <p className="mt-2 text-gray-700 dark:text-gray-300">{value}</p>
       </div>
     );
   }

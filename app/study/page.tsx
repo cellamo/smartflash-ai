@@ -139,29 +139,31 @@ function StudyDecks() {
 
   return (
     <>
-      <div className="mb-4 flex flex-wrap justify-between items-center gap-2">
-        <Button 
-          onClick={() => setIsDialogOpen(true)} 
-          className="dark:bg-gray-700 dark:text-white"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Create New Deck
-        </Button>
-        <div className="flex items-center space-x-2">
+      <div className="mb-4 flex items-center justify-between gap-2">
+        <div className="w-1/2 max-w-[180px]">
+          <Button 
+            onClick={() => setIsDialogOpen(true)} 
+            className="dark:bg-gray-700 dark:text-white whitespace-nowrap w-full"
+          >
+            <Plus className="mr-1 h-4 w-4" /> New Deck
+          </Button>
+        </div>
+        <div className="flex items-center w-1/2 justify-end">
           <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
-            <SelectTrigger className="w-[140px] dark:bg-gray-700 dark:text-white">
+            <SelectTrigger className="w-[140px] dark:bg-gray-700 dark:text-white text-sm">
               <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="lastStudied">Last Studied</SelectItem>
-              <SelectItem value="creationTime">Creation Time</SelectItem>
-              <SelectItem value="alphabetical">Alphabetical</SelectItem>
+              <SelectItem value="creationTime">Created</SelectItem>
+              <SelectItem value="alphabetical">A-Z</SelectItem>
             </SelectContent>
           </Select>
           <Button
             variant="outline"
             size="icon"
             onClick={() => setSortDirection(prev => prev === 'asc' ? 'desc' : 'asc')}
-            className="dark:bg-gray-700 dark:text-white"
+            className="dark:bg-gray-700 dark:text-white ml-1 w-[40px]"
           >
             {sortDirection === 'asc' ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
           </Button>
