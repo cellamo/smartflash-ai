@@ -124,8 +124,8 @@ export default function ProfilePage() {
   }
 
   return (
-    <div className="flex flex-col min-h-screen bg-slate-100 dark:bg-slate-900">
-      <main className="flex-1 overflow-y-auto p-4 pb-16">
+    <div className="flex flex-col min-h-screen bg-slate-200 dark:bg-slate-900">
+      <main className="flex-1 overflow-y-auto p-4 pb-4">
         <Card className="max-w-2xl mx-auto mb-16 border-2 dark:border-slate-700">
           <CardHeader className="border-b dark:border-slate-700">
             <CardTitle className="text-2xl font-bold flex items-center">
