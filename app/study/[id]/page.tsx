@@ -167,7 +167,7 @@ export default function StudyPage({ params }: { params: { id: string } }) {
         <Card className="mb-4">
           <CardContent className="text-center p-4">
             <h1 className="text-2xl font-bold mb-4">Study Session Complete!</h1>
-            <p className="mb-4">You've reviewed all the cards in this deck.</p>
+            <p className="mb-4">You&apos;ve reviewed all the cards in this deck.</p>
             <Button onClick={handleFinishStudy} className="mt-4 dark:bg-gray-700 dark:text-white">
               End Session
             </Button>
