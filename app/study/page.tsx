@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 interface Deck {
   id: string;
   name: string;
+  description: string;
   card_count: number;
   last_studied: string | null;
   created_at: string;
@@ -45,6 +46,7 @@ function StudyDecks() {
     setSortedDecks(filteredAndSortedDecks);
   }, [decks, searchQuery, sortOption, sortDirection]);
 
+  
   const fetchDecks = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -63,7 +65,25 @@ function StudyDecks() {
     setLoading(false);
   };
 
-  const filterAndSortDecks = (decks: Deck[], query: string, sort: SortOption, direction: SortDirection) => {
+  
+  function formatLastStudied(dateString: string | null): string {
+    if (!dateString) return 'Never';
+
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffTime = Math.abs(now.getTime() - date.getTime());
+    const diffMinutes = Math.floor(diffTime / (1000 * 60));
+    const diffHours = Math.floor(diffTime / (1000 * 60 * 60));
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffMinutes < 60) return `${diffMinutes}m ago`;
+    if (diffHours < 24) return `${diffHours}h ago`;
+    if (diffDays === 1) return 'Yesterday';
+    if (diffDays <= 7) return `${diffDays} days ago`;
+    if (diffDays <= 30) return `${Math.floor(diffDays / 7)} weeks ago`;
+    if (diffDays <= 365) return `${Math.floor(diffDays / 30)} months ago`;
+    return `${Math.floor(diffDays / 365)} years ago`;
+  }  const filterAndSortDecks = (decks: Deck[], query: string, sort: SortOption, direction: SortDirection) => {
     let filtered = decks;
     if (query.trim()) {
       const lowercaseQuery = query.toLowerCase();
@@ -182,10 +202,11 @@ function StudyDecks() {
             <Card key={deck.id} className="flex flex-col dark:bg-gray-800">
               <CardHeader>
                 <CardTitle className="dark:text-white">{deck.name}</CardTitle>
+                <CardDescription className="text-sm text-muted-foreground mb-4 dark:text-gray-400">{deck.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
-                <p className="text-sm text-muted-foreground mb-4 dark:text-gray-300">
-                  {deck.card_count} cards • Last studied: {deck.last_studied || 'Never'}
+              <p className="text-sm text-muted-foreground mb-4 dark:text-gray-400">
+                  {deck.card_count} cards • Last studied: {formatLastStudied(deck.last_studied)}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   <Button variant="outline" size="sm" asChild className="dark:text-gray-300 dark:bg-gray-700 dark:hover:text-white">

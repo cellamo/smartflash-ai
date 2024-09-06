@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -12,19 +12,40 @@ import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
+interface Deck {
+  id: string;
+  name: string;
+  description: string;
+  card_count: number;
+  last_studied: string | null;
+  created_at: string;
+}
+
 export default function EditDeckPage({ params }: { params: { id: string } }) {
   const [front, setFront] = useState("");
   const [back, setBack] = useState("");
   const [flashcards, setFlashcards] = useState<Flashcard[]>([]);
-  const [deckName, setDeckName] = useState("");
+
   const [isEditingName, setIsEditingName] = useState(false);
   const [newDeckName, setNewDeckName] = useState("");
+
+  const [isEditingDescription, setIsEditingDescription] = useState(false);
+  const [newDeckDescription, setNewDeckDescription] = useState("");
+
   const [notes, setNotes] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const cardsPerPage = 5;
   const supabase = createClientComponentClient();
   const router = useRouter();
+  const [deck, setDeck] = useState<Deck>({
+    id: "",
+    name: "",
+    description: "",
+    card_count: 0,
+    last_studied: null,
+    created_at: ""
+  });
 
   useEffect(() => {
     fetchDeckDetails();
@@ -34,16 +55,24 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   const fetchDeckDetails = async () => {
     const { data, error } = await supabase
       .from('decks')
-      .select('name')
+      .select('id,name,description,created_at,card_count,last_studied')
       .eq('id', params.id)
       .single();
 
     if (error) {
       console.error('Error fetching deck details:', error);
       toast.error('Failed to load deck details');
-    } else {
-      setDeckName(data.name);
+    } else if (data) {
+      setDeck({
+        id: data.id,
+        name: data.name,
+        description: data.description,
+        created_at: data.created_at,
+        card_count: data.card_count ?? 0,
+        last_studied: data.last_studied ?? null
+      });
       setNewDeckName(data.name);
+      setNewDeckDescription(data.description);
     }
   };
 
@@ -65,9 +94,9 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
     if (front.trim() && back.trim()) {
       const { data, error } = await supabase
         .from('flashcards')
-        .insert({ 
-          front: front.trim(), 
-          back: back.trim(), 
+        .insert({
+          front: front.trim(),
+          back: back.trim(),
           notes: notes.trim(),
           deck_id: params.id,
           created_at: new Date().toISOString(),
@@ -96,7 +125,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
   };
 
   const updateDeckName = async () => {
-    if (newDeckName.trim() && newDeckName !== deckName) {
+    if (newDeckName.trim() && newDeckName !== deck.name) {
       const { error } = await supabase
         .from('decks')
         .update({ name: newDeckName.trim() })
@@ -106,13 +135,34 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
         console.error('Error updating deck name:', error);
         toast.error('Failed to update deck name');
       } else {
-        setDeckName(newDeckName.trim());
+        setDeck({ ...deck, name: newDeckName.trim() });
         setIsEditingName(false);
         toast.success('Deck name updated successfully');
       }
     } else {
       setIsEditingName(false);
-      setNewDeckName(deckName);
+      setNewDeckName(deck.name);
+    }
+  };
+
+  const updateDeckDescription = async () => {
+    if (newDeckDescription.trim() && newDeckDescription !== deck.description) {
+      const { error } = await supabase
+        .from('decks')
+        .update({ description: newDeckDescription.trim() })
+        .eq('id', params.id);
+
+      if (error) {
+        console.error('Error updating deck description:', error);
+        toast.error('Failed to update deck description');
+      } else {
+        setDeck({ ...deck, description: newDeckDescription.trim() });
+        setIsEditingDescription(false);
+        toast.success('Deck description updated successfully');
+      }
+    } else {
+      setIsEditingDescription(false);
+      setNewDeckDescription(deck.description);
     }
   };
 
@@ -172,13 +222,13 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
       </Card>
     ), { duration: 5000 });
   };
-  
+
   const confirmDeleteFlashcard = async (flashcardId: string, t: any) => {
     const { error } = await supabase
       .from('flashcards')
       .delete()
       .eq('id', flashcardId);
-  
+
     if (error) {
       console.error('Error deleting flashcard:', error);
       toast.error('Failed to delete flashcard');
@@ -188,7 +238,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
     }
     toast.dismiss(t);
   };
-  
+
 
   const filteredFlashcards = flashcards.filter(card =>
     card.front.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -206,8 +256,8 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
     <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
-          <Button 
-            onClick={() => router.back()} 
+          <Button
+            onClick={() => router.back()}
             className="mb-4"
             variant="outline"
           >
@@ -224,7 +274,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                     className="mr-2 dark:bg-gray-700 dark:text-white"
                   />
                 ) : (
-                  <CardTitle className="text-xl font-bold">Edit Deck: {deckName}</CardTitle>
+                  <CardTitle className="text-xl font-bold">Edit Deck: {deck.name}</CardTitle>
                 )}
                 <Button
                   onClick={() => isEditingName ? updateDeckName() : setIsEditingName(true)}
@@ -234,6 +284,27 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                   {isEditingName ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
                 </Button>
               </div>
+              <CardDescription className="text-sm text-muted-foreground mb-4 dark:text-gray-400 flex items-center justify-between">
+                {isEditingDescription ? (
+                  <Input
+                    value={newDeckDescription}
+                    onChange={(e) => setNewDeckDescription(e.target.value)}
+                    className="mr-2 dark:bg-gray-700 dark:text-white"
+                  />
+                ) : (
+                  deck.description || <span className="italic text-gray-500">No description available</span>
+                )}
+                <Button
+                  onClick={() => isEditingDescription ? updateDeckDescription() : setIsEditingDescription(true)}
+                  variant="outline"
+                  size="icon"
+                >
+                  {isEditingDescription ? <Check className="h-4 w-4" /> : <Edit className="h-4 w-4" />}
+                </Button>
+              </CardDescription>
+              <CardDescription className="text-sm text-muted-foreground mb-4 dark:text-gray-400">
+                {flashcards.length} cards • Created {new Date(deck.created_at).toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' }).replace(/\//g, '.')}
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <div className="flex flex-col gap-4">
@@ -304,7 +375,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
                     </li>
                   ))}
                 </ul>
-              ) : (                <p className="text-center text-muted-foreground">No flashcards found</p>
+              ) : (<p className="text-center text-muted-foreground">No flashcards found</p>
               )}
               <div className="flex justify-between items-center mt-4">
                 <Button
@@ -331,7 +402,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
           </Card>
         </div>
         <div className="px-2 py-4">
-          <Button 
+          <Button
             onClick={deleteDeck}
             className="w-full"
             variant="destructive"
@@ -340,7 +411,7 @@ export default function EditDeckPage({ params }: { params: { id: string } }) {
           </Button>
         </div>
       </div>
-      
+
       <Toaster />
     </div>
   );

@@ -32,6 +32,7 @@ This schema contains the main application data.
 	•	name, description: Metadata about the deck.
 	•	created_at, last_studied: Timestamps.
 	•	review_limit: Max number of reviews allowed per session.
+	•	card_count: Number of cards in the deck.
 
 3. flashcard_reviews
 
@@ -57,28 +58,58 @@ This schema contains the main application data.
 
 	•	Stores additional user profile information.
 	•	Columns:
-	•	id: Primary key, references auth.users.id.
-	•	full name, username, bio, avatar_url: User’s profile data.
-	•	total_cards_studied, total_study_time, longest_streak: Stats related to the user’s activity.
-	•	email, role: User’s email and role.
+	•	id: UUID, primary key, references auth.users.id.
+	•	full_name: Text, user's full name.
+	•	username: Text, user's chosen username.
+	•	bio: Text, user's biography.
+	•	avatar_url: Text, URL to user's avatar image.
+	•	total_cards_studied: Integer, total number of cards studied.
+	•	total_study_time: Integer, total study time in minutes.
+	•	longest_streak: Integer, longest study streak in days.
+	•	email: Text, user's email address.
+	•	role: Text, user's role in the system.
+	•	theme: VARCHAR, user's preferred UI theme.
+	•	daily_review_limit: Integer, maximum number of daily reviews.
+	•	default_study_duration: Integer, default study session duration in minutes.
+	•	preferred_study_mode: VARCHAR, user's preferred study mode.
+	•	notifications_enabled: Boolean, whether notifications are enabled for the user.
 
 6. study_sessions
 
 	•	Logs details of each study session.
 	•	Columns:
-	•	id: Primary key.
-	•	user_id: References auth.users.id.
-	•	deck_id: References decks.id.
-	•	start_time, end_time: Timestamps.
-	•	cards_reviewed, correct_reviews: 
+	•	id: uuid, Primary key.
+	•	user_id: uuid, References auth.users.id.
+	•	deck_id: uuid, References decks.id.
+	•	start_time: timestamp with time zone.
+	•	end_time: timestamp with time zone.
+	•	cards_reviewed: integer.
+	•	correct_reviews: integer.
+	•	card_count: integer, Number of cards selected for the session.
+	•	is_scrambled: boolean, Indicates if the cards were scrambled for this session.
 
-7.	chat_sessions
-	•	Logs: Details of chat sessions.
-	•	Columns:
-	•	id: Primary key.
-	•	user_id: References auth.users.id.
-	•	deck_id: References decks.id.
-	•	created_at: Timestamp when the chat session was created.
-	•	last_message: Text of the last message in the chat session.
-	•	last_updated: Timestamp when the chat session was last updated.
-	•	messages: JSONB column containing the messages in the chat session.
+7. chat_sessions
+	• Logs details of chat sessions.
+	• Columns:
+	• id: uuid, Primary key.
+	• user_id: uuid, References auth.users.id.
+	• deck_id: uuid, References decks.id.
+	• created_at: timestamp with time zone, Timestamp when the chat session was created.
+	• last_message: text, Text of the last message in the chat session.
+	• last_updated: timestamp with time zone, Timestamp when the chat session was last updated.
+	• messages: jsonb, JSONB column containing the messages in the chat session.
+	• token_count: integer, Number of tokens used in the chat session.
+	• model: text, The AI model used for the chat session.
+
+8. weekly_stats
+
+	• Stores weekly statistics for users.
+	• Columns:
+	• id: uuid, Primary key.
+	• user_id: uuid, References auth.users.id.
+	• week_start_date: date, Start date of the week for these statistics.
+	• total_cards_studied: integer, Total number of cards studied in the week.
+	• total_new_words: integer, Total number of new words learned in the week.
+	• average_accuracy: double precision, Average accuracy of reviews in the week.
+	• total_study_time_minutes: integer, Total study time in minutes for the week.
+	• longest_streak: integer, Longest streak of consecutive days studied in the week.
