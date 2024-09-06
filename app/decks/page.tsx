@@ -33,7 +33,7 @@ import {
 } from "@/components/ui/select";
 import { useRouter } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 interface Flashcard {
   id: number;
   front: string;
@@ -53,6 +53,8 @@ export default function QuickAddFlashcardPage() {
   const [selectedDeckId, setSelectedDeckId] = useState<string | null>(null);
   const supabase = createClientComponentClient();
   const [decks, setDecks] = useState<any[]>([]);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newDeckName, setNewDeckName] = useState("");
 
   useEffect(() => {
     fetchDecks();
@@ -158,6 +160,28 @@ export default function QuickAddFlashcardPage() {
     }
   };
 
+  const createNewDeck = async () => {
+    if (newDeckName.trim()) {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        const { data, error } = await supabase
+          .from('decks')
+          .insert({ name: newDeckName, user_id: user.id })
+          .select()
+          .single();
+        if (error) {
+          console.error('Error creating deck:', error);
+          toast.error('Failed to create deck');
+        } else {
+          setDecks([...decks, data]);
+          setNewDeckName("");
+          setIsDialogOpen(false);
+          toast.success('Deck created successfully');
+        }
+      }
+    }
+  };
+
   return (
     <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
@@ -227,6 +251,33 @@ export default function QuickAddFlashcardPage() {
   <Wand2 className="mr-2 h-4 w-4" /> Create AI Deck from Notes
 </GradientButton>
 
+            <Button 
+              onClick={() => setIsDialogOpen(true)} 
+              className="w-full mb-6 dark:bg-gray-700 dark:text-white"
+            >
+              <Plus className="mr-2 h-4 w-4" /> Create New Deck
+            </Button>
+
+            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Create New Deck</DialogTitle>
+                  <DialogDescription>
+                    Enter a name for your new deck.
+                  </DialogDescription>
+                </DialogHeader>
+                <Input
+                  type="text"
+                  placeholder="Deck name"
+                  value={newDeckName}
+                  onChange={(e) => setNewDeckName(e.target.value)}
+                  className="mb-4"
+                />
+                <DialogFooter>
+                  <Button onClick={createNewDeck}>Create Deck</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
 
             <Card className="mb-6">
   <CardHeader>

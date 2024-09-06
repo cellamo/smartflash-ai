@@ -256,8 +256,8 @@ export default function ChatPage() {
                   chats!
                 </CardDescription>
               )}
-              <div className="flex gap-2 mb-4">
-                <div className="flex-grow">
+              <div className="flex flex-col gap-4 mb-4">
+                <div>
                   <Label htmlFor="deck-select">Select a deck</Label>
                   <Select onValueChange={setSelectedDeck} value={selectedDeck}>
                     <SelectTrigger id="deck-select" className="w-full dark:bg-gray-700 dark:text-white">
@@ -270,7 +270,7 @@ export default function ChatPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="flex-grow">
+                <div>
                   <Label htmlFor="model-select">Select a model</Label>
                   <Select onValueChange={setSelectedModel} value={selectedModel}>
                     <SelectTrigger id="model-select" className="w-full dark:bg-gray-700 dark:text-white">
@@ -283,7 +283,7 @@ export default function ChatPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button onClick={handleStartNewChat} className="dark:bg-gray-700 dark:text-white mt-6">
+                <Button onClick={handleStartNewChat} className="w-full dark:bg-gray-700 dark:text-white">
                   <Plus className="h-4 w-4 mr-2" /> New Chat
                 </Button>
               </div>
