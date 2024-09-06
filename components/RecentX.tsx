@@ -102,7 +102,7 @@ export function RecentX() {
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="created">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-2 bg-slate-200 dark:bg-slate-700">
             <TabsTrigger value="created">Recently Created</TabsTrigger>
             <TabsTrigger value="studied">Recently Studied</TabsTrigger>
           </TabsList>
