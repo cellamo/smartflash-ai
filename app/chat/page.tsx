@@ -30,6 +30,7 @@ import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import Link from "next/link";
+import { Label } from "@/components/ui/label";
 
 interface Deck {
   id: string;
@@ -42,6 +43,7 @@ interface ChatSession {
   user_id: string;
   created_at: string;
   last_message: string;
+  model: string;
 }
 
 interface Profile {
@@ -58,6 +60,7 @@ export default function ChatPage() {
   const sessionsPerPage = 5;
   const supabase = createClientComponentClient();
   const [filter, setFilter] = useState<string>("");
+  const [selectedModel, setSelectedModel] = useState<string>("gpt4o-mini");
 
   useEffect(() => {
     fetchProfile();
@@ -130,7 +133,8 @@ export default function ChatPage() {
           .insert({
             user_id: user.id,
             deck_id: selectedDeck,
-            last_message: "New conversation started"
+            last_message: "New conversation started",
+            model: selectedModel
           })
           .select()
           .single();
@@ -253,28 +257,44 @@ export default function ChatPage() {
                 </CardDescription>
               )}
               <div className="flex gap-2 mb-4">
-  <Select onValueChange={setSelectedDeck} value={selectedDeck}>
-    <SelectTrigger className="flex-grow dark:bg-gray-700 dark:text-white">
-      <SelectValue placeholder="Select a deck" />
-    </SelectTrigger>
-    <SelectContent>
-      {decks.map((deck) => (
-        <SelectItem key={deck.id} value={deck.id}>{deck.name}</SelectItem>
-      ))}
-    </SelectContent>
-  </Select>
-  <Button onClick={handleStartNewChat} className="dark:bg-gray-700 dark:text-white">
-    <Plus className="h-4 w-4 mr-2" /> New Chat
-  </Button>
-</div>
-<div className="mb-4">
-  <input
-    type="text"
-    placeholder="Filter by deck name"
-    className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
-    onChange={(e) => setFilter(e.target.value)}
-  />
-</div>
+                <div className="flex-grow">
+                  <Label htmlFor="deck-select">Select a deck</Label>
+                  <Select onValueChange={setSelectedDeck} value={selectedDeck}>
+                    <SelectTrigger id="deck-select" className="w-full dark:bg-gray-700 dark:text-white">
+                      <SelectValue placeholder="Select a deck" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {decks.map((deck) => (
+                        <SelectItem key={deck.id} value={deck.id}>{deck.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex-grow">
+                  <Label htmlFor="model-select">Select a model</Label>
+                  <Select onValueChange={setSelectedModel} value={selectedModel}>
+                    <SelectTrigger id="model-select" className="w-full dark:bg-gray-700 dark:text-white">
+                      <SelectValue placeholder="Select a model" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="gpt4o-mini">GPT-4o</SelectItem>
+                      <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+                      <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <Button onClick={handleStartNewChat} className="dark:bg-gray-700 dark:text-white mt-6">
+                  <Plus className="h-4 w-4 mr-2" /> New Chat
+                </Button>
+              </div>
+              <div className="mb-4">
+                <input
+                  type="text"
+                  placeholder="Filter by deck name"
+                  className="w-full p-2 border rounded dark:bg-gray-700 dark:text-white"
+                  onChange={(e) => setFilter(e.target.value)}
+                />
+              </div>
             </CardContent>
           </Card>
           <Card className="flex-grow overflow-scroll">

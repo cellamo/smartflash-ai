@@ -12,6 +12,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { useRouter } from "next/navigation";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface Message {
   role: "user" | "assistant";
@@ -32,6 +33,7 @@ export default function ChatSessionPage() {
   const [isDisabled, setIsDisabled] = useState(false);
 
   const [flashcards, setFlashcards] = useState<string | null>(null);
+  const [currentModel, setCurrentModel] = useState<string>("gpt4o-mini");
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -87,6 +89,7 @@ export default function ChatSessionPage() {
         body: JSON.stringify({
           messages: [...messages, newMessage],
           flashcards: JSON.parse(flashcards || "[]"),
+          model: currentModel,
         }),
       });
 
@@ -105,29 +108,37 @@ export default function ChatSessionPage() {
           if (done) break;
           const chunk = decoder.decode(value);
 
-          if (chunk.includes("[TOKEN_COUNT:")) {
-            newTokenCount = parseInt(
-              chunk.match(/\[TOKEN_COUNT:(\d+)\]/)?.[1] || "0"
-            );
-            setTokenCount(newTokenCount);
+          accumulatedResponse += chunk;
+        
+          const tokenCountMatch = accumulatedResponse.match(/\[TOKEN_COUNT:(\d+)\]/);
+          if (tokenCountMatch) {
+            newTokenCount = parseInt(tokenCountMatch[1]);
+            accumulatedResponse = accumulatedResponse.replace(/\[TOKEN_COUNT:\d+\]/, "");
             break;
-          } else {
-            accumulatedResponse += chunk;
-            setMessages((prev) => {
-              const updatedMessages = [...prev];
-              updatedMessages[updatedMessages.length - 1].content =
-                accumulatedResponse;
-              return updatedMessages;
-            });
           }
+
+          setMessages((prev) => {
+            const updatedMessages = [...prev];
+            updatedMessages[updatedMessages.length - 1].content = accumulatedResponse.trim();
+            return updatedMessages;
+          });
         }
+
+        setTokenCount(newTokenCount);
+
+        // Final update to ensure the complete message is displayed
+        setMessages((prev) => {
+          const updatedMessages = [...prev];
+          updatedMessages[updatedMessages.length - 1].content = accumulatedResponse.trim();
+          return updatedMessages;
+        });
 
         // Update the chat session with new messages and token count
         updateChatSession(
           [
             ...messages,
             newMessage,
-            { role: "assistant", content: accumulatedResponse },
+            { role: "assistant", content: accumulatedResponse.trim() },
           ],
           newTokenCount
         );
@@ -152,7 +163,7 @@ export default function ChatSessionPage() {
     try {
       const { data: chatSession, error: chatError } = await supabase
         .from("chat_sessions")
-        .select("deck_id, messages, token_count")
+        .select("deck_id, messages, token_count, model")
         .eq("id", chatId)
         .single();
 
@@ -172,6 +183,7 @@ export default function ChatSessionPage() {
       }
 
       setTokenCount(chatSession.token_count || 1);
+      setCurrentModel(chatSession.model || "gpt4o-mini");
 
       const optimizedFlashcards = deck.flashcards.map(({ front, back }) => [
         front,
@@ -202,6 +214,21 @@ export default function ChatSessionPage() {
     }
   };
 
+  const handleModelChange = async (newModel: string) => {
+    setCurrentModel(newModel);
+    const { error } = await supabase
+      .from("chat_sessions")
+      .update({ model: newModel })
+      .eq("id", chatId);
+
+    if (error) {
+      console.error("Error updating model:", error);
+      toast.error("Failed to update model");
+    } else {
+      toast.success("Model updated successfully");
+    }
+  };
+
   return (
     <>
       <Head>
@@ -227,9 +254,23 @@ export default function ChatSessionPage() {
               </CardHeader>
               {deckName && (
                 <CardContent className="pt-2">
-                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
-                    <BookOpen className="h-4 w-4 mr-2" />
-                    Current Deck: {deckName}
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400">
+                      <BookOpen className="h-4 w-4 mr-2" />
+                      Current Deck: {deckName}
+                    </div>
+                    <div className="flex items-center">
+                      <Select onValueChange={handleModelChange} value={currentModel}>
+                        <SelectTrigger className="w-[180px] dark:bg-gray-700 dark:text-white">
+                          <SelectValue placeholder="Select model" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="gpt4o-mini">GPT-4o</SelectItem>
+                          <SelectItem value="gemini-1.5-flash">Gemini 1.5 Flash</SelectItem>
+                          <SelectItem value="gemini-1.5-pro">Gemini 1.5 Pro</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 </CardContent>
               )}
