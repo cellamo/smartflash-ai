@@ -5,15 +5,18 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
-import { Copy, Lightbulb } from 'lucide-react';
+import { Copy, Lightbulb, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { MobileDock } from '@/components/MobileDock';
+import { useRouter } from 'next/navigation'; // Ensure this import is included
 
 export default function CreateDeckJson() {
   const [jsonInput, setJsonInput] = useState('');
   const [message, setMessage] = useState('');
   const supabase = createClientComponentClient();
   const [isPromptVisible, setIsPromptVisible] = useState(false);
+  const router = useRouter(); // Add this line
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
@@ -95,8 +98,15 @@ Notes: [NOTES]`;
   };
 
   return (
-    <div className="container mx-auto p-4 dark:bg-slate-900">
+    <div className="container mx-auto p-4 bg-slate-200 dark:bg-slate-900">
       <MobileDock />
+      <Button
+        onClick={() => router.back()} // Add this button
+        className="mb-4"
+        variant="outline"
+      >
+        <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+      </Button>
       <Card className="mb-4">
         <CardHeader className="flex flex-row items-center gap-2">
           <Lightbulb className="h-5 w-5 text-yellow-500" />
@@ -135,7 +145,7 @@ Notes: [NOTES]`;
           </Button>
         </CardHeader>
         <CardContent>
-          <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-gray-700 dark:bg-gray-700 dark:text-white rounded-md p-4">
+          <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-slate-200 dark:bg-gray-700 dark:text-white rounded-md p-4">
             {`{
   "name": "JavaScript Basics",
   "description": "A deck covering fundamental JavaScript concepts",
@@ -172,7 +182,7 @@ Notes: [NOTES]`;
             <Button onClick={handleCopyPrompt} variant="outline" size="sm" className='dark:bg-gray-700 dark:text-white mb-4'>
             <Copy className="mr-2 h-4 w-4" /> Copy Prompt
           </Button>
-            <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-gray-700 dark:bg-gray-700 dark:text-white rounded-md p-4">
+            <pre className="text-xs sm:text-sm md:text-base overflow-x-auto whitespace-pre-wrap bg-slate-200 dark:bg-gray-700 dark:text-white rounded-md p-4">
               {`Create a flashcard deck about [TOPIC] or from the [NOTES]. The deck should have a name, description, and at least 10 flashcards. Each flashcard should have a front (question), back (answer), and optional notes. Please format the output as a JSON object following this structure:
 
 {

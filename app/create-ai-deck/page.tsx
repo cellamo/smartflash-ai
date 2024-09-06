@@ -4,12 +4,13 @@ import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Wand2, Loader2, Check, X, Lock } from "lucide-react";
+import { Wand2, Loader2, Check, X, Lock, ArrowLeft } from "lucide-react";
 import { MobileDock } from "@/components/MobileDock";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { useRouter } from 'next/navigation'; // Ensure this import is included
 
 interface Flashcard {
   front: string;
@@ -29,6 +30,7 @@ export default function CreateAIDeckPage() {
   const [generatedDeck, setGeneratedDeck] = useState<Deck | null>(null);
   const [userRole, setUserRole] = useState<string>("free");
   const supabase = createClientComponentClient();
+  const router = useRouter(); // Add this line
 
   useEffect(() => {
     fetchUserRole();
@@ -161,6 +163,13 @@ export default function CreateAIDeckPage() {
     <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
+          <Button
+            onClick={() => router.back()} // Add this button
+            className="mb-4"
+            variant="outline"
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" /> Go Back
+          </Button>
           <Card className="w-full mb-8">
             <CardHeader>
               <CardTitle className="text-xl font-bold">
