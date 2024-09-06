@@ -86,7 +86,7 @@ export default function EditFlashcardPage({ params }: { params: { id: string } }
   if (!flashcard) return <div>Loading...</div>;
 
   return (
-    <div className="flex flex-col h-screen bg-slate-200 pb-16">
+    <div className="flex flex-col h-screen bg-slate-200 dark:bg-slate-900 pb-16">
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
         <div className="max-w-md mx-auto">
           <Button 
@@ -108,18 +108,21 @@ export default function EditFlashcardPage({ params }: { params: { id: string } }
                   placeholder="Front (question)"
                   value={flashcard.front}
                   onChange={(e) => setFlashcard({...flashcard, front: e.target.value})}
+                  className="dark:bg-gray-700"
                 />
                 <Textarea
                   placeholder="Back (answer)"
                   value={flashcard.back}
                   onChange={(e) => setFlashcard({...flashcard, back: e.target.value})}
+                  className="dark:bg-gray-700"
                 />
                 <Textarea
                   placeholder="Additional notes (optional)"
                   value={flashcard.notes}
                   onChange={(e) => setFlashcard({...flashcard, notes: e.target.value})}
+                  className="dark:bg-gray-700"
                 />
-                <Button onClick={updateFlashcard} className="w-full">
+                <Button onClick={updateFlashcard} className="w-full dark:bg-gray-700 dark:text-white">
                   <Save className="mr-2 h-4 w-4" /> Save Changes
                 </Button>
               </div>
