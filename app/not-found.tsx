@@ -1,9 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import Link from 'next/link';
-import { motion } from 'framer-motion';
-import { Brain, Lightbulb, RotateCcw, Home } from 'lucide-react';
+import { Brain, Lightbulb, RotateCcw } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 interface Flashcard {
@@ -72,37 +70,36 @@ const NotFound: React.FC = () => {
 
   const regenerateCard = () => {
     setShowAnswer(false);
-    // In a real scenario, you'd fetch a new flashcard from your API
     const randomIndex = Math.floor(Math.random() * flashcards.length);
     setFlashcard(flashcards[randomIndex]);
   };
 
   return (
     <>
-      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-100 p-8">
+      <main className="flex min-h-screen flex-col items-center justify-center bg-slate-200 dark:bg-slate-900 p-8">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">Oops! Page Not Found</h1>
-          <p className="text-slate-600">Let&apos;s turn this 404 into a learning opportunity!</p>
+          <h1 className="text-4xl font-bold text-slate-800 dark:text-slate-200 mb-2">Oops! Page Not Found</h1>
+          <p className="text-slate-600 dark:text-slate-400">Let&apos;s turn this 404 into a learning opportunity!</p>
         </div>
         
-        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mb-8">
+        <div className="bg-white rounded-xl shadow-lg p-6 w-full max-w-md mb-8 dark:bg-slate-800">
           <div className="text-center mb-4">
-            <Brain className="inline-block w-12 h-12 text-slate-700 mb-2" />
-            <h2 className="text-2xl font-semibold text-slate-800">Learn While You&apos;re Lost</h2>
+            <Brain className="inline-block w-12 h-12 text-slate-700 dark:text-slate-300 mb-2" />
+            <h2 className="text-2xl font-semibold text-slate-800 dark:text-slate-200">Learn While You&apos;re Lost</h2>
           </div>
           <div 
-            className="bg-slate-100 rounded-lg p-4 min-h-[150px] flex items-center justify-center cursor-pointer"
+            className="bg-slate-100 rounded-lg p-4 min-h-[150px] flex items-center justify-center cursor-pointer dark:bg-slate-700"
             onClick={flipCard}
           >
-            <p className="text-xl font-medium text-center text-slate-700">
+            <p className="text-xl font-medium text-center text-slate-700 dark:text-slate-300">
               {showAnswer ? flashcard.answer : flashcard.question}
             </p>
           </div>
           <div className="mt-4 flex justify-between items-center">
-            <button onClick={flipCard} className="flex items-center text-slate-600 hover:text-slate-800">
+            <button onClick={flipCard} className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-800">
               <Lightbulb className="mr-2 w-5 h-5" /> {showAnswer ? 'Hide Answer' : 'Show Answer'}
             </button>
-            <button onClick={regenerateCard} className="flex items-center text-slate-600 hover:text-slate-800">
+            <button onClick={regenerateCard} className="flex items-center text-slate-600 dark:text-slate-400 hover:text-slate-800">
               <RotateCcw className="mr-2 w-5 h-5" /> New Card
             </button>
           </div>
@@ -110,7 +107,7 @@ const NotFound: React.FC = () => {
         
         <button 
         onClick={() => router.back()} 
-        className="bg-slate-700 text-white hover:bg-slate-600 font-semibold py-2 px-4 rounded-full transition duration-300 flex items-center"
+        className="bg-slate-700 dark:bg-slate-600 text-white hover:bg-slate-600 font-semibold py-2 px-4 rounded-full transition duration-300 flex items-center"
       >
         <RotateCcw className="mr-2 w-5 h-5" /> Go Back
       </button>
