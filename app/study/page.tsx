@@ -8,11 +8,15 @@ import { Input } from "@/components/ui/input";
 import { Plus, Settings, Play, Edit, BookOpen, Search, ChevronUp, ChevronDown } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { MobileDock } from '@/components/MobileDock';
-import { Toaster } from "@/components/ui/sonner"
-import { toast } from "sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { toast } from "sonner";
 import { useSearchParams } from 'next/navigation';
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
+import { Slider } from "@/components/ui/slider";
+import { ScrollArea } from "@/components/ui/scroll-area";
 
 interface Deck {
   id: string;
@@ -21,6 +25,12 @@ interface Deck {
   card_count: number;
   last_studied: string | null;
   created_at: string;
+  review_limit: number;
+  new_cards_per_day: number;
+  review_order: 'random' | 'fixed';
+  min_ease_factor: number;
+  max_ease_factor: number;
+  enable_ai_hints: boolean;
 }
 
 type SortOption = 'lastStudied' | 'creationTime' | 'alphabetical';
@@ -36,6 +46,14 @@ function StudyDecks() {
   const [sortOption, setSortOption] = useState<SortOption>("creationTime");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
   const supabase = createClientComponentClient();
+  const [selectedDeck, setSelectedDeck] = useState<Deck | null>(null);
+  const [reviewLimit, setReviewLimit] = useState(20);
+  const [newCardsPerDay, setNewCardsPerDay] = useState(10);
+  const [reviewOrder, setReviewOrder] = useState<'random' | 'fixed'>('random');
+  const [minEaseFactor, setMinEaseFactor] = useState(130);
+  const [maxEaseFactor, setMaxEaseFactor] = useState(250);
+  const [enableAIHints, setEnableAIHints] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     fetchDecks();
@@ -46,7 +64,6 @@ function StudyDecks() {
     setSortedDecks(filteredAndSortedDecks);
   }, [decks, searchQuery, sortOption, sortDirection]);
 
-  
   const fetchDecks = async () => {
     setLoading(true);
     const { data: { user } } = await supabase.auth.getUser();
@@ -65,7 +82,6 @@ function StudyDecks() {
     setLoading(false);
   };
 
-  
   function formatLastStudied(dateString: string | null): string {
     if (!dateString) return 'Never';
 
@@ -83,7 +99,9 @@ function StudyDecks() {
     if (diffDays <= 30) return `${Math.floor(diffDays / 7)} weeks ago`;
     if (diffDays <= 365) return `${Math.floor(diffDays / 30)} months ago`;
     return `${Math.floor(diffDays / 365)} years ago`;
-  }  const filterAndSortDecks = (decks: Deck[], query: string, sort: SortOption, direction: SortDirection) => {
+  }
+
+  const filterAndSortDecks = (decks: Deck[], query: string, sort: SortOption, direction: SortDirection) => {
     let filtered = decks;
     if (query.trim()) {
       const lowercaseQuery = query.toLowerCase();
@@ -133,6 +151,44 @@ function StudyDecks() {
     }
   };
 
+  const openSettings = (deck: Deck) => {
+    setSelectedDeck(deck);
+    setReviewLimit(deck.review_limit || 20);
+    setNewCardsPerDay(deck.new_cards_per_day || 10);
+    setReviewOrder(deck.review_order || 'random');
+    setMinEaseFactor(deck.min_ease_factor || 130);
+    setMaxEaseFactor(deck.max_ease_factor || 250);
+    setEnableAIHints(deck.enable_ai_hints || false);
+    setIsSettingsOpen(true);
+  };
+
+  const saveDeckSettings = async () => {
+    if (selectedDeck) {
+      const { data, error } = await supabase
+        .from('decks')
+        .update({
+          review_limit: reviewLimit,
+          new_cards_per_day: newCardsPerDay,
+          review_order: reviewOrder,
+          min_ease_factor: minEaseFactor,
+          max_ease_factor: maxEaseFactor,
+          enable_ai_hints: enableAIHints,
+        })
+        .eq('id', selectedDeck.id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error updating deck settings:', error);
+        toast.error('Failed to update deck settings');
+      } else {
+        setDecks(decks.map(deck => deck.id === data.id ? data : deck));
+        toast.success('Deck settings updated successfully');
+        setIsSettingsOpen(false);
+      }
+    }
+  };
+
   if (loading) {
     return <div>Loading decks...</div>;
   }
@@ -150,8 +206,8 @@ function StudyDecks() {
         </div>
         <div className="flex items-center w-1/2 justify-end">
           <Select value={sortOption} onValueChange={(value: SortOption) => setSortOption(value)}>
-            <SelectTrigger className="w-[140px] dark:bg-gray-700 dark:text-white text-sm">
-              <SelectValue placeholder="Sort by" />
+          <SelectTrigger className="w-[140px] dark:bg-gray-700 dark:text-white text-sm">
+          <SelectValue placeholder="Sort by" />
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="lastStudied">Last Studied</SelectItem>
@@ -207,7 +263,7 @@ function StudyDecks() {
                 <CardDescription className="text-sm text-muted-foreground mb-4 dark:text-gray-400">{deck.description}</CardDescription>
               </CardHeader>
               <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground mb-4 dark:text-gray-400">
+                <p className="text-sm text-muted-foreground mb-4 dark:text-gray-400">
                   {deck.card_count} cards • Last studied: {formatLastStudied(deck.last_studied)}
                 </p>
                 <div className="flex flex-wrap gap-2">
@@ -221,10 +277,8 @@ function StudyDecks() {
                       <Edit className="mr-2 h-4 w-4" /> Edit
                     </Link>
                   </Button>
-                  <Button variant="outline" size="sm" asChild className="dark:text-gray-300 dark:bg-gray-700 dark:hover:text-white">
-                    <Link href={`/deck-settings/${deck.id}`}>
-                      <Settings className="mr-2 h-4 w-4" /> Settings
-                    </Link>
+                  <Button variant="outline" size="sm" onClick={() => openSettings(deck)} className="dark:text-gray-300 dark:bg-gray-700 dark:hover:text-white">
+                    <Settings className="mr-2 h-4 w-4" /> Settings
                   </Button>
                 </div>
               </CardContent>
@@ -249,6 +303,108 @@ function StudyDecks() {
           />
           <DialogFooter>
             <Button onClick={createNewDeck}>Create Deck</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={isSettingsOpen} onOpenChange={setIsSettingsOpen}>
+        <DialogContent className="sm:max-w-[425px]">
+          <DialogHeader>
+            <DialogTitle>Deck Settings: {selectedDeck?.name}</DialogTitle>
+            <DialogDescription>
+              Customize your deck settings here.
+            </DialogDescription>
+          </DialogHeader>
+          <ScrollArea className="h-[400px]">
+            <div className="mr-4">
+              <div className="grid gap-4 py-4">
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="reviewLimit" className="text-right">
+                    Daily Review Limit
+                  </Label>
+                  <Input
+                    id="reviewLimit"
+                    type="number"
+                    value={reviewLimit}
+                    onChange={(e) => setReviewLimit(Number(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The maximum number of cards to review each day.
+                </p>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="newCardsPerDay" className="text-right">
+                    New Cards Per Day
+                  </Label>
+                  <Input
+                    id="newCardsPerDay"
+                    type="number"
+                    value={newCardsPerDay}
+                    onChange={(e) => setNewCardsPerDay(Number(e.target.value))}
+                    className="col-span-3"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The number of new cards to introduce each day.
+                </p>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label htmlFor="reviewOrder" className="text-right">
+                    Review Order
+                  </Label>
+                  <Select value={reviewOrder} onValueChange={(value: 'random' | 'fixed') => setReviewOrder(value)}>
+                    <SelectTrigger className="col-span-3">
+                      <SelectValue placeholder="Select review order" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="random">Random</SelectItem>
+                      <SelectItem value="fixed">Fixed</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The order in which cards are reviewed.
+                </p>
+                <div className="grid grid-cols-4 items-center gap-4">
+                  <Label className="text-right">Ease Factor Range</Label>
+                  <div className="col-span-3">
+                    <Slider
+                      min={100}
+                      max={300}
+                      step={10}
+                      value={[minEaseFactor, maxEaseFactor]}
+                      onValueChange={([min, max]) => {
+                        setMinEaseFactor(min);
+                        setMaxEaseFactor(max);
+                      }}
+                      className="[&_[role=slider]]:h-4 [&_[role=slider]]:w-4"
+                    />
+                    <div className="flex justify-between mt-2">
+                      <span>{minEaseFactor}%</span>
+                      <span>{maxEaseFactor}%</span>
+                    </div>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  The range of ease factors used to adjust card difficulty.
+                </p>
+                <div className="flex items-center justify-between">
+                  <Label htmlFor="enableAIHints">Enable AI-Assisted Hints</Label>
+                  <Switch
+                    id="enableAIHints"
+                    checked={enableAIHints}
+                    onCheckedChange={setEnableAIHints}
+                    className="dark:bg-gray-700 dark:text-white"
+                  />
+                </div>
+                <p className="text-sm text-muted-foreground">
+                  Enable AI-generated hints for reviewing cards.
+                </p>
+              </div>
+            </div>
+          </ScrollArea>
+          <DialogFooter>
+            <Button onClick={saveDeckSettings} className="dark:bg-gray-700 dark:text-white">Save changes</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -284,16 +440,15 @@ function StudyContent() {
 }
 
 export default function StudyPage() {
-
   return (
     <div className={`flex min-h-screen w-full flex-col pb-20 bg-slate-200 dark:bg-slate-900`}>
       <MobileDock />
       <div className="flex-grow overflow-auto px-2 py-4 pb-2">
-          <div className="max-w-4xl mx-auto">
-            <Suspense fallback={<div className="dark:text-white">Loading...</div>}>
-              <StudyContent />
-            </Suspense>
-          </div>
+        <div className="max-w-4xl mx-auto">
+          <Suspense fallback={<div className="dark:text-white">Loading...</div>}>
+            <StudyContent />
+          </Suspense>
+        </div>
       </div>
       <Toaster />
     </div>

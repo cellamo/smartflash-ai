@@ -177,6 +177,19 @@ export default function StudyPage({ params }: { params: { id: string } }) {
     );
   }
 
+  const getNextReviewTime = (difficulty: string): string => {
+    switch (difficulty) {
+      case "Easy":
+        return "4 days";
+      case "Good":
+        return "1 day";
+      case "Hard":
+        return "10 min";
+      default:
+        return "1 day";
+    }
+  };
+
   return (
     <div className="container mx-auto p-4 bg-slate-200 dark:bg-slate-900 min-h-screen pb-16">
       <Card className="mb-4">
@@ -218,15 +231,30 @@ export default function StudyPage({ params }: { params: { id: string } }) {
         ) : (
           <div className="w-full">
             <div className="flex justify-between mb-4">
-              <Button onClick={() => handleDifficulty("Easy")} variant="outline">
-                Easy
-              </Button>
-              <Button onClick={() => handleDifficulty("Good")} variant="outline">
-                Good
-              </Button>
-              <Button onClick={() => handleDifficulty("Hard")} variant="outline">
-                Hard
-              </Button>
+              <div className="flex flex-col items-center">
+                <Button onClick={() => handleDifficulty("Easy")} variant="outline">
+                  Easy
+                </Button>
+                <span className="text-xs mt-1 text-gray-500">{getNextReviewTime("Easy")}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <Button onClick={() => handleDifficulty("Good")} variant="outline">
+                  Good
+                </Button>
+                <span className="text-xs mt-1 text-gray-500">{getNextReviewTime("Good")}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <Button onClick={() => handleDifficulty("Hard")} variant="outline">
+                  Hard
+                </Button>
+                <span className="text-xs mt-1 text-gray-500">{getNextReviewTime("Hard")}</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <Button onClick={() => handleDifficulty("Again")} variant="outline">
+                  Again
+                </Button>
+                <span className="text-xs mt-1 text-gray-500">{getNextReviewTime("Again")}</span>
+              </div>
             </div>
             <div className="flex justify-end">
               <Button onClick={toggleFlag} variant="outline">

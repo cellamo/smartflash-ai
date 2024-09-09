@@ -27,12 +27,19 @@ This schema contains the main application data.
 
 	•	Stores the flashcard decks created by users.
 	•	Columns:
-	•	id: Primary key.
-	•	user_id: References auth.users.id.
-	•	name, description: Metadata about the deck.
-	•	created_at, last_studied: Timestamps.
-	•	review_limit: Max number of reviews allowed per session.
-	•	card_count: Number of cards in the deck.
+	•	id: UUID, primary key.
+	•	user_id: UUID, references auth.users.id.
+	•	name: Text, name of the deck.
+	•	description: Text, description of the deck.
+	•	created_at: Timestamp with time zone, creation date of the deck.
+	•	last_studied: Timestamp with time zone, last study date of the deck.
+	•	review_limit: Integer, max number of reviews allowed per session.
+	•	card_count: Integer, number of cards in the deck.
+	•	new_cards_per_day: Integer, number of new cards to introduce per day.
+	•	review_order: Character varying, order in which cards are reviewed.
+	•	min_ease_factor: Integer, minimum ease factor for spaced repetition.
+	•	max_ease_factor: Integer, maximum ease factor for spaced repetition.
+	•	enable_ai_hints: Boolean, whether AI hints are enabled for this deck.
 
 3. flashcard_reviews
 

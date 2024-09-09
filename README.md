@@ -1,54 +1,61 @@
-# Shadcn Landing Page Template
 
-## <a href="https://ui.shadcn.com/" target="_blank">Shadcn</a> + <a href="https://nextjs.org/" target="_blank">Next.js</a> + <a href="https://www.typescriptlang.org/" target="_blank">TypeScript</a> + <a href="https://tailwindcss.com/" target="_blank">Tailwind</a>.
+# SmartFlash AI
 
-### This is a project conversion <a href="https://github.com/leoMirandaa/shadcn-vue-landing-page" target="_blank">Shadcn-Vue</a> to NextJS
-
-![Alt text](./public/demo-img.jpg)
-
-## Sections
-
-- [x] Navbar
-- [x] Sidebar(mobile)
-- [x] Hero
-- [x] Sponsors
-- [x] Benefits
-- [x] Features
-- [x] Testimonials
-- [x] Team
-- [x] Pricing
-- [x] Frequently Asked Questions(FAQ)
-- [x] Services
-- [x] Footer
+SmartFlash AI is an intelligent flashcard application that leverages AI to enhance your learning experience. It combines spaced repetition algorithms with advanced AI features to help you study more effectively and efficiently.
 
 ## Features
 
-- [x] Fully Responsive Design
-- [x] User Friendly Navigation
-- [x] Dark Mode
+- Create and manage flashcard decks
+- AI-powered chat assistance for study sessions
+- Spaced repetition algorithm for optimized learning
+- Customizable study sessions
+- Progress tracking and analytics
+- User profiles with personalized settings
+- Mobile-friendly design
 
-## How to install
+## Tech Stack
 
-1. Clone this repositoy:
+- Next.js 14 with App Router
+- TypeScript
+- Supabase (PostgreSQL database)
+- Tailwind CSS
+- Shadcn UI components
+- OpenAI GPT-4 and Google Gemini AI integration
 
-```bash
-git clone https://github.com/nobruf/shadcn-landing-page.git
-```
+## Getting Started
 
-2. Go into project
+1. Clone the repository
+2. Install dependencies: `npm install`
+3. Set up environment variables on `.env.local` (see `.env.example`)
+4. Run the development server: `npm run dev`
 
-```bash
-cd shadcn-landing-page
-```
+## Project Structure
 
-3. Install dependencies
+- `/app`: Next.js app router pages and API routes
+- `/components`: Reusable React components
+- `/utils`: Utility functions and helpers
 
-```bash
-npm install
-```
+## API Routes
 
-4. Run project
+- `/api/chat`: Handles AI chat interactions
+- `/api/update-stats`: Updates user study statistics
 
-```bash
-npm run dev
-```
+## Database Schema
+
+The application uses Supabase with the following main tables:
+
+- `auth.users`: User authentication
+- `profiles`: User profiles and preferences
+- `decks`: Flashcard decks
+- `flashcards`: Individual flashcards
+- `study_sessions`: Logs of study sessions
+- `chat_sessions`: AI chat session logs
+- `weekly_stats`: User's weekly study statistics
+
+## Contributing
+
+Contributions are welcome!
+
+## License
+
+[MIT License](LICENSE)
