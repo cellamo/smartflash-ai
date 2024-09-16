@@ -133,33 +133,6 @@ export default function QuickAddFlashcardPage() {
     toast.success("Exported to Anki format successfully!");
   };
 
-  const importFromAnki = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        const lines = content.split("\n");
-        const importedCards = lines.map((line, index) => {
-          const [front, back, notes = ""] = line.split("\t");
-          return {
-            id: Date.now() + index,
-            front: front.trim(),
-            back: back.trim(),
-            notes: notes.trim(),
-            deck: selectedDeck || "Imported",
-            timestamp: new Date().toLocaleString(),
-          };
-        });
-        setRecentCards([...importedCards, ...recentCards]);
-        toast.success(
-          `Imported ${importedCards.length} flashcards successfully!`
-        );
-      };
-      reader.readAsText(file);
-    }
-  };
-
   const createNewDeck = async () => {
     if (newDeckName.trim()) {
       const { data: { user } } = await supabase.auth.getUser();
@@ -310,7 +283,7 @@ export default function QuickAddFlashcardPage() {
               <CardContent>
                 <div className="flex flex-col gap-4">
                   <label htmlFor="import-file" className="w-full">
-                    <Button className="w-full dark:bg-gray-700 dark:text-white">
+                    <Button className="w-full dark:bg-gray-700 dark:text-white" onClick={() => window.location.href = '/anki-import'}>
                       <Upload className="mr-2 h-4 w-4" /> Import Deck from Anki
                     </Button>
                   </label>
@@ -324,19 +297,6 @@ export default function QuickAddFlashcardPage() {
                       <Upload className="mr-2 h-4 w-4" /> Create Deck from JSON
                     </Button>
                   </label>
-                  <input
-                    id="import-words"
-                    type="file"
-                    accept=".txt"
-                    style={{ display: "none" }}
-                  />
-                  <input
-                    id="import-file"
-                    type="file"
-                    accept=".txt"
-                    onChange={importFromAnki}
-                    style={{ display: "none" }}
-                  />
                 </div>
               </CardContent>
             </Card>
