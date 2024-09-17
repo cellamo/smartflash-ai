@@ -41,6 +41,7 @@ export default function AnkiImportPage() {
     if (!file) return;
   
     setIsLoading(true);
+  
     try {
       const formData = new FormData();
       formData.append('file', file);
@@ -52,27 +53,20 @@ export default function AnkiImportPage() {
   
       if (!response.ok) {
         const errorData = await response.json();
-        console.error('Import error details:', errorData);
         throw new Error(errorData.error || 'Failed to import Anki deck');
       }
   
       const data = await response.json();
-  
       const importedDeck: Deck = {
         name: data.deckName,
         description: "Imported from Anki .apkg file",
-        flashcards: data.cards.map((card: any) => ({
-          front: card.front,
-          back: card.back,
-          notes: "", // Anki does not have a 'notes' field in this context
-        })),
+        flashcards: data.cards,
       };
   
       setImportedDeck(importedDeck);
       toast.success("Anki deck imported successfully!");
     } catch (error: any) {
       console.error("Error importing Anki deck:", error);
-      console.error("Error details:", error.message);
       toast.error(`Failed to import Anki deck: ${error.message}`);
     } finally {
       setIsLoading(false);
