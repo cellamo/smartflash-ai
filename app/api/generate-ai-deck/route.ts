@@ -21,8 +21,14 @@ export async function POST(request: Request) {
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: "You are an AI assistant that creates flashcard decks based on provided notes. Create a deck with a name, description, and at least 10 flashcards. Each flashcard should have a front (question), back (answer), and optional notes." },
-        { role: "user", content: `Create a flashcard deck from these notes: ${notes}` }
+        {
+          role: "system", 
+          content: "You are an AI assistant that creates flashcard decks based on provided notes. The deck must include a name, description, and flashcards. Each flashcard should have a front (question), back (answer), and optional notes. If the user does not specify how many flashcards to create, generate at least 5 flashcards, with a default range of 5-10 flashcards. If the user requests, you may generate up to a maximum of 20 flashcards based on the context and detail of the provided notes."
+      },
+      {
+          role: "user", 
+          content: `Create a flashcard deck from these notes: ${notes}.`
+      }      
       ],
       response_format: {
         type: "json_schema",

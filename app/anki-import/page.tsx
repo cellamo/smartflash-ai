@@ -36,46 +36,44 @@ export default function AnkiImportPage() {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
-  const handleFileUpload = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
-
+  
     setIsLoading(true);
     try {
-      // Placeholder for actual Anki import logic
-      // In a real implementation, you'd send the file to a server endpoint
-      // that processes the .apkg file and returns the deck data
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // Simulating processing time
-
-      const mockImportedDeck: Deck = {
-        name: "Imported Anki Deck",
-        description: "This deck was imported from an Anki .apkg file",
-        flashcards: [
-          {
-            front: "What is the capital of Japan?",
-            back: "Tokyo",
-            notes: "Largest metropolitan area in the world",
-          },
-          {
-            front: "Who wrote 'To Kill a Mockingbird'?",
-            back: "Harper Lee",
-            notes: "Published in 1960",
-          },
-          {
-            front: "What is the chemical symbol for gold?",
-            back: "Au",
-            notes: "From the Latin 'aurum'",
-          },
-        ],
+      const formData = new FormData();
+      formData.append('file', file);
+  
+      const response = await fetch('/api/import-anki', {
+        method: 'POST',
+        body: formData,
+      });
+  
+      if (!response.ok) {
+        const errorData = await response.json();
+        console.error('Import error details:', errorData);
+        throw new Error(errorData.error || 'Failed to import Anki deck');
+      }
+  
+      const data = await response.json();
+  
+      const importedDeck: Deck = {
+        name: data.deckName,
+        description: "Imported from Anki .apkg file",
+        flashcards: data.cards.map((card: any) => ({
+          front: card.front,
+          back: card.back,
+          notes: "", // Anki does not have a 'notes' field in this context
+        })),
       };
-
-      setImportedDeck(mockImportedDeck);
+  
+      setImportedDeck(importedDeck);
       toast.success("Anki deck imported successfully!");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Error importing Anki deck:", error);
-      toast.error("Failed to import Anki deck");
+      console.error("Error details:", error.message);
+      toast.error(`Failed to import Anki deck: ${error.message}`);
     } finally {
       setIsLoading(false);
     }

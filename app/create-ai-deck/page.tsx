@@ -177,14 +177,21 @@ export default function CreateAIDeckPage() {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <Textarea
-                placeholder="Paste your class notes here..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="mb-4"
-                rows={10}
-              />
-              <Button onClick={createAIDeckMock} className="w-full dark:bg-gray-700 dark:text-white" disabled={isLoading}>
+              {/* Wrap Textarea and Counter in a relative div */}
+              <div className="relative">
+                <Textarea
+                  placeholder="Paste your class notes here..."
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  className="mb-4"
+                  rows={10}
+                />
+                {/* Character Counter */}
+                <span className="absolute bottom-2 right-2 text-xs text-gray-500">
+                  {notes.length} characters
+                </span>
+              </div>
+              <Button onClick={createAIDeck} className="w-full dark:bg-gray-700 dark:text-white" disabled={isLoading}>
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
