@@ -3,16 +3,8 @@ import { Open } from 'unzipper';
 import sqlite3 from 'sqlite3';
 import { open } from 'sqlite';
 import { writeFile, unlink } from 'fs/promises';
-import { dirname, join } from 'path';
-import { mkdir } from 'fs/promises';
-import { Readable } from 'stream';
-
-function cleanText(text: string): string {
-  return text.replace(/<[^>]*>/g, '')
-    .replace(/&nbsp;/g, ' ')
-    .replace(/\s+/g, ' ')
-    .trim();
-}
+import { join } from 'path';
+import os from 'os';
 
 export async function POST(req: NextRequest) {
   let tempFilePath: string | null = null;
@@ -35,8 +27,7 @@ export async function POST(req: NextRequest) {
     const collectionBuffer = await entry.buffer();
 
     // Write the buffer to a temporary file
-    tempFilePath = join(process.cwd(), 'tmp', `temp_collection_${Date.now()}.anki2`);
-    await mkdir(dirname(tempFilePath), { recursive: true });
+    tempFilePath = join(os.tmpdir(), `temp_collection_${Date.now()}.anki2`);
     await writeFile(tempFilePath, collectionBuffer);
 
     // Open SQLite database from the temporary file
@@ -76,4 +67,11 @@ export async function POST(req: NextRequest) {
       }
     }
   }
+}
+
+function cleanText(text: string): string {
+  return text.replace(/<[^>]*>/g, '')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
 }
