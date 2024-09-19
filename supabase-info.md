@@ -80,6 +80,7 @@ This schema contains the main application data.
 	•	default_study_duration: Integer, default study session duration in minutes.
 	•	preferred_study_mode: VARCHAR, user's preferred study mode.
 	•	notifications_enabled: Boolean, whether notifications are enabled for the user.
+	•	is_admin: Boolean, whether the user has admin privileges (default: false).
 
 6. study_sessions
 
@@ -120,3 +121,26 @@ This schema contains the main application data.
 	• average_accuracy: double precision, Average accuracy of reviews in the week.
 	• total_study_time_minutes: integer, Total study time in minutes for the week.
 	• longest_streak: integer, Longest streak of consecutive days studied in the week.
+
+9. feedbacks
+
+	• Stores user feedback and bug reports.
+	• Columns:
+	• id: uuid, Primary key, Default generated using gen_random_uuid().
+	• user_id: uuid, References auth.users.id, ON DELETE CASCADE.
+	• created_at: timestamp with time zone, NOT NULL, Default set to current timestamp.
+	• feedback_type: text, NOT NULL, e.g., "bug", "feature_request", "general".
+	• message: text, NOT NULL, The actual feedback or bug report message.
+	• screenshot_url: text, Optional URL to a screenshot.
+	• metadata: jsonb, Optional additional data.
+
+	• Indexes:
+	• feedbacks_user_id_idx: Index on user_id for faster queries.
+
+Note: This table is created by the migration file: supabase/migrations/add_feedbacks_table.sql
+
+10. admins
+
+	• Stores admin users.
+	• Columns:
+	• user_id: uuid, Primary key, References auth.users(id), ON DELETE CASCADE.

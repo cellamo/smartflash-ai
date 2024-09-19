@@ -2,7 +2,16 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Home, BookOpen, Bot, Plus, User, Settings, LogOut } from "lucide-react";
+import {
+  Home,
+  BookOpen,
+  Bot,
+  Plus,
+  User,
+  Settings,
+  LogOut,
+  MessageCircle, // Import the feedback icon
+} from "lucide-react";
 import { cn } from "@/lib/utils";
 import { MobileThemeToggle } from "@/components/MobileThemeToggle";
 
@@ -27,23 +36,23 @@ export function MobileDock() {
   const supabase = createClientComponentClient();
   const router = useRouter();
 
-  const handleLogout = async () => {
+  async function handleLogout() {
     await supabase.auth.signOut();
     window.location.href = "/auth";
-  };
+  }
 
-  const handleNavigation = (href: string) => {
-    if (href === '/profile' && pathname.startsWith('/study')) {
+  function handleNavigation(href: string) {
+    if (href === "/profile" && pathname.startsWith("/study")) {
       router.push(`${href}?refresh=true`);
     } else {
       router.push(href);
     }
-  };
+  }
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-background border-t border-secondary">
       <div className="flex justify-around items-center h-16 relative">
-        {NAV_ITEMS.map((item) => (
+        {NAV_ITEMS.map((item) =>
           item.dropdown ? (
             <DropdownMenu key={item.label}>
               <DropdownMenuTrigger className="flex flex-col items-center justify-center w-full h-full">
@@ -51,13 +60,17 @@ export function MobileDock() {
                 <span className="text-xs">{item.label}</span>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuItem onSelect={() => handleNavigation('/profile')}>
+                <DropdownMenuItem onSelect={() => handleNavigation("/profile")}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => handleNavigation('/settings')}>
+                <DropdownMenuItem onSelect={() => handleNavigation("/settings")}>
                   <Settings className="mr-2 h-4 w-4" />
                   <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={() => handleNavigation("/feedback")}>
+                  <MessageCircle className="mr-2 h-4 w-4" />
+                  <span>Feedback</span>
                 </DropdownMenuItem>
                 <MobileThemeToggle />
                 <DropdownMenuItem onSelect={handleLogout}>
@@ -67,7 +80,8 @@ export function MobileDock() {
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <button              key={item.label}
+            <button
+              key={item.label}
               type="button"
               onClick={() => handleNavigation(item.href)}
               className={`inline-flex flex-col items-center justify-center w-full h-full ${
@@ -91,7 +105,7 @@ export function MobileDock() {
               <span className={cn("text-xs", item.special ? "sr-only" : "")}>{item.label}</span>
             </button>
           )
-        ))}
+        )}
       </div>
     </nav>
   );
